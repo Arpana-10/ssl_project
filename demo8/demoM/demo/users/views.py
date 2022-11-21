@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.views import View
 from django.http import HttpResponseRedirect 
 from .models import assignments, UserProfile, courses, studentsubmissions
-from .forms import assignment_form, UserForm, UserProfileForm, course_form, course_reg, solution, csv_form,feedback_form
+from .forms import assignment_form, UserForm, UserProfileForm, course_form, course_reg, solution, csv_form
 from django.views.generic import ListView
 from django.template import RequestContext
 from django.template.loader import get_template
@@ -16,6 +16,8 @@ import os, csv
 from io import BytesIO
 from django.conf import settings
 from django.core.mail import send_mail
+import datetime
+from time import gmtime, strftime
 
 def home(request):
     try:
@@ -28,8 +30,12 @@ def home(request):
                 app = False
                 assign = course.assignments.all()
                 for ass in assign:
-
-                    if ass.status == "pending":
+                    sols = ass.s.all()
+                    d = False
+                    for s in sols:
+                        if s.username == request.user.username:
+                            d=True
+                    if d == False:   
                         a.append(ass)
                         app = True
                 
@@ -67,7 +73,6 @@ def update(request):
     return render(request, 'users/updateprofile.html', {
         "form":form
     })
-
 def createassignment(request, num):    
     if request.method == 'POST':
             submitted_form = assignment_form(request.POST, request.FILES)
@@ -75,9 +80,9 @@ def createassignment(request, num):
                 print("here")
                 doc = request.FILES
                 doc_name = doc["assignmentfile"]
-                x = courses.objects.get(ids = num)
+                x = courses.objects.get(id = num)
                 # n = x.ass_n
-                course_added = assignments(assignmentfile = doc_name, title = submitted_form.cleaned_data["title"], code =  submitted_form.cleaned_data["code"], deadline = submitted_form.cleaned_data['deadline'], upload_type = submitted_form.cleaned_data['upload_type'])
+                course_added = assignments(assignmentfile = doc_name, title = submitted_form.cleaned_data["title"],  deadline = submitted_form.cleaned_data["deadline"], upload_type = submitted_form.cleaned_data['upload_type'] )
                 course_added.save()
                 x.assignments.add(course_added)
                 # x.ass_n = n+1
@@ -92,6 +97,7 @@ def createassignment(request, num):
     return render(request, 'users/assign.html', context)
         
 
+
 def createcourse(request):
     if request.user.u.identity == "teacher":
         submitted_form = course_form(request.POST or None)
@@ -105,44 +111,41 @@ def createcourse(request):
         print(request.user.u.identity)
         if submitted_form.is_valid():
             print(request.user.u.identity)
-            courseExists = courses.objects.filter(title = submitted_form.cleaned_data['title']).exists()
+            
             if request.user.u.identity == "teacher":
-                if not courseExists:
-                    course_added = courses(title = submitted_form.cleaned_data['title'], code = submitted_form.cleaned_data['code'], ids =  submitted_form.cleaned_data['ids'])
-                    course_added.save()
-                    current_user = request.user
-                    #print( current_user.usercurrent_user = request.username)
-                    c = UserProfile.objects.get(user_name = current_user.username)
-                    c.courses_registered.add(course_added)
+                
+                code = strftime("%Y%m%d%H%M%S", gmtime())
+                course_added = courses(title = submitted_form.cleaned_data['title'], code = code)
+                course_added.save()
+                current_user = request.user
+                #print( current_user.usercurrent_user = request.username)
+                c = UserProfile.objects.get(user_name = current_user.username)
+                c.courses_registered.add(course_added)
+                c.save()
+                SuccMsg = "Course successfully created"
+                context = {
+                    "msg" : SuccMsg,
+                    'code' : code,
+                }
+                return render(request, "users/teach_profile.html", context)
+                # ErrMsg = "Course Already exists"
+
+            if request.user.u.identity == "student" :
+                courseExists = courses.objects.filter(code = submitted_form.cleaned_data['code']).exists()
+                if courseExists:
+                    course = courses.objects.get(code = submitted_form.cleaned_data['code'])
+                    c = UserProfile.objects.get(user_name = request.user.username)
+                    c.courses_registered.add(course)
                     c.save()
-                    SuccMsg = "Course successfully created"
+                    SuccMsg = "Successfully registered for the course"
                     context = {
                         "msg" : SuccMsg,
                     }
-                    return render(request, "users/teach_profile.html", context)
-                ErrMsg = "Course Already exists"
+                    return render(request, "users/st_profile.html", context)
 
-            if request.user.u.identity == "student" :
-            
-                if courseExists:
-                    course = courses.objects.get(title = submitted_form.cleaned_data['title'])
-                    if course.code == submitted_form.cleaned_data['code']:
-                        c = UserProfile.objects.get(user_name = request.user.username)
-                        c.courses_registered.add(course)
-                        c.save()
-                        SuccMsg = "Successfully registered for the course"
-                        context = {
-                            "msg" : SuccMsg,
-                        }
-                        return render(request, "users/st_profile.html", context)
-                    else:
-                        ErrMsg = "Incorrect code provided"
-                        print("incorrect code")
                 else:
                     ErrMsg = "Course does not exist"
-                    print("wrong title")
-
-                    
+                    print("wrong code")        
 
     context = {
 			"form": submitted_form,
@@ -154,7 +157,7 @@ def createcourse(request):
 def assignment_views( request, num):
     if request.method == 'GET':
 
-        x = courses.objects.get(ids = num).assignments.all()
+        x = courses.objects.get(id = num).assignments.all()
         l = []
         for element in x:
             l.append(element)
@@ -222,7 +225,7 @@ def course_page(request, num):
             course = user.courses_registered.all()
             print(course)
             for c in course:
-                if c.ids == num:
+                if c.id == num:
                     l.append(user)
     context = {
         "num":num,
@@ -234,35 +237,35 @@ def course_page(request, num):
         return render(request, 'users/course_page_std.html', context)
         
 def solution_upload(request, num1, num2):
+    msg = ""
     if request.method == 'POST':
+        
         submitted_form = solution(request.POST, request.FILES)
         if submitted_form.is_valid():
             doc = request.FILES
             doc_name = doc["assignment"]
-            x = courses.objects.get(ids = num1)
+            x = courses.objects.get(id = num1)
             z = x.assignments.get(id = num2).upload_type
             if not doc_name.name.endswith(z):
-                messages.error(request,'Please upload a' + str(z) + 'file')
+                # messages.error(request,'Please upload a' + str(z) + 'file')
+                msg= 'Please upload a ' + str(z) + ' file'
+                print("----------")
                 
             else:
                 current_user = request.user
                 s = studentsubmissions(solution = doc_name, username = current_user.username, file_name = submitted_form.cleaned_data['name'] )
                 s.save()
+                x = courses.objects.get(id = num1)
                 x.assignments.get(id = num2).s.add(s)
                 if x.assignments.get(id = num2).deadline < s.created_at:
-                    x.assignments.get(id = num2).filter(id = num2).update(status = "late")
-                    print(x.assignments.get(id = num2).status)
+                    studentsubmissions.objects.filter(id = s.id).update(status = "late")
                 else:
-                    x.assignments.filter(id = num2).update(status = "done")
-                    print( "---", x.assignments.get(id = num2).status)
-
+                    studentsubmissions.objects.filter(id = s.id).update(status = "success")
+                # 20221121111714 check
+                # 20221121113337 try1
                 x.save()
-                if request.user.u.identity == "teacher":
-                    return redirect('http://127.0.0.1:8000/allcourses/')
-                else:
-                    return redirect('http://127.0.0.1:8000/allcourses/')  
     current_user = request.user
-    x = courses.objects.get(ids = num1)
+    x = courses.objects.get(id = num1)
     y = x.assignments.get(id = num2).s.filter(username = current_user.username)
     z = x.assignments.get(id = num2)
     l = []
@@ -272,12 +275,13 @@ def solution_upload(request, num1, num2):
     context = {
 			"form": submitted_form, 
             "sol": l,
-            "ass_file":z
+            "ass_file":z,
+            'msg':msg,
 		} 
     return render(request, 'users/sol.html', context)
 
 def all_submissions(request, num1, num2):
-    x = courses.objects.get(ids = num1)
+    x = courses.objects.get(id = num1)
     y =  x.assignments.get(id = num2).s.all()
     l = []
     d = {}
@@ -289,92 +293,37 @@ def all_submissions(request, num1, num2):
             d[s.username] = s
     for i in d:
         l.append(d[i])
+        print(d[i].created_at, d[i].created_at )
 
     if request.method == 'POST':
-        if request.POST.get('form_id',False) == 'feed':
-            # print(1)
-            form = feedback_form(request.POST)
-            if form.is_valid():
-                
-                print(request.POST.get('submit'))
-                u = request.POST.get('submit')
-                
-                # x = courses.objects.get(ids = num1).assignments.get(number = num2).s.get(solution = fields[1])
+        filenames = []
+        for f in l:
+            filenames.append(f.solution.url)
+        zip_subdir = "submissions"
+        zip_filename = "%s.zip" % zip_subdir
 
-                # for i in u:
-                #     if(u.created_at )
-                a = x.assignments.get(id = num2).s.filter(username = u)
-                # print(a)
-                max = a[0]
-                for i in a:
-                    if i.created_at > max.created_at:
-                        max = i
-                feedback_user = form.cleaned_data["feedback"]
-                # print(feedback_user)
-                marks_user = form.cleaned_data["marks"]
-                # print(max.marks)
-                max.feedback = feedback_user
-                max.save()
-                max.marks = marks_user
-                max.save()
-                # print(max.feedback)
-                # print(max.marks)
-                # print(a)
-                # print(a[0].feedback)
-                # f = studentsubmissions(username = u, feedback = feedback_user)
-                # f.save()
-                # print(f)
-                # print(f.feedback)
-                empty_form = feedback_form()
-                X = courses.objects.get(ids = num1)
-                Y =  X.assignments.get(id = num2).s.all()
-                L = []
-                D = {}
-                for S in Y:
-                    if S.username in D.keys():
-                        if S.created_at > D[S.username].created_at :
-                            D[S.username] = S
-                    else:
-                        D[S.username] = S
-                for i in D:
-                    L.append(D[i])
-                context={
-                    "sol": L,
-                    "num1": num1,
-                    "num2":num2,
-                    "form":empty_form
-                }
-                return render(request, 'users/submissions.html',context)
-        elif request.POST.get('form_id',False) =='download':
-            filenames = []
-            for f in l:
-                filenames.append(f.solution.url)
-            zip_subdir = "submissions"
-            zip_filename = "%s.zip" % zip_subdir
+        s = BytesIO()
+        zf = ZipFile(s, "w")
+        for fpath in filenames:
+            fdir, fname = os.path.split(fpath)
+            zip_path = os.path.join(zip_subdir, fname)
+            fpath = "." + fpath
+            zf.write(fpath, zip_path)
+        zf.close()
+        resp = HttpResponse(s.getvalue(), content_type = "application/x-zip-compressed")
+        resp['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+        return resp
 
-            s = BytesIO()
-            zf = ZipFile(s, "w")
-            for fpath in filenames:
-                fdir, fname = os.path.split(fpath)
-                zip_path = os.path.join(zip_subdir, fname)
-                fpath = "." + fpath
-                zf.write(fpath, zip_path)
-            zf.close()
-            resp = HttpResponse(s.getvalue(), content_type = "application/x-zip-compressed")
-            resp['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
-            return resp
 
-    form = feedback_form()
     context={
         "sol": l,
         "num1": num1,
-        "num2":num2,
-        "form":form
+        "num2":num2
     }
     return render(request, 'users/submissions.html', context)
 
 def export_to_csv(reuest, num1, num2):
-    profiles = courses.objects.get(ids = num1).assignments.get(id = num2).s.all()
+    profiles = courses.objects.get(id = num1).assignments.get(id = num2).s.all()
     response = HttpResponse('text/csv')
     response['Content-Disposition'] = 'attachment; filename=profile_export.csv'
     writer = csv.writer(response)
@@ -411,7 +360,7 @@ def marks( request, num1, num2):
                     
                     if i!=0 and len(fields) == 4:
                         print(fields)
-                        x = courses.objects.get(ids = num1).assignments.get(id = num2).s.get(solution = fields[1])
+                        x = courses.objects.get(id = num1).assignments.get(id = num2).s.get(solution = fields[1])
                         x.feedback = fields[2]
                         x.marks = fields[3]
                         x.save()
@@ -424,20 +373,10 @@ def marks( request, num1, num2):
 		}
     return render(request, 'users/marks.html', context)
 
-def email_invite(request, num):
-    subject = "subject"
-    message = 'mshgg'
-    email_from = settings.EMAIL_HOST_USER
-    print("sending ")
-    recipient_list = ['arpten11@gmail.com', ]
-    send_mail( subject, message, email_from, recipient_list, fail_silently=False, )
-    print("  hmm maybe sent  ")
-    return render( request, 'email_invite.html')
 
 def deregister_view(request, num, uid):
     users = UserProfile.objects.get(id = uid)
-    cc = users.courses_registered.get(ids = num)
+    cc = users.courses_registered.get(id = num)
     courses_reg = users.courses_registered.remove(cc.id)
-    # ass_rem = 
 
     return render(request, 'users/userprofile.html')
