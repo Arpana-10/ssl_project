@@ -13,35 +13,28 @@
         <small style="color: green">{{ msg }}</small>
 
         <p>
+            <table>
             <h4> Your pending assignments</h4>
-            <ul>
+           
             {% for a in ass %}
-            
+            <tr>
                 {% for i in a %}
-            {% if forloop.first %}
-            <li style='background-color:lightblue;'>{{i.title}}</li>
-            <ul>
-            {% else %}
-                        <li>{{i.title}}</li> 
+                    {% if forloop.first %}
+                    <td  style='background-color:lightblue;'> {{i.title}} </td>
+                    {% else %}
+                    <tr>
                         
-                        <br>
-                        <span style="color:red">deadline</span> - {{i.deadline}}
-                        <br>
-                        <span style="color:violet">status</span> - {{i.status}}
+                        <td>{{i.title}}</td>        
+                        <td><span style="color:red">deadline</span> - {{i.deadline}}</td>
+                    </tr>
+                    {% endif %}
 
-            {% endif %}
-                
-
-
-            {% if forloop.last %}
-            
-            <ul>
-            {% endif %}
             {% endfor %}
             
-                </ul>
+        </tr>
             {% endfor %}
-            </ul>
+            
+        </table>
         </p>
 
 

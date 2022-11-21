@@ -6,22 +6,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> All assignments</title>
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+        </style>
 </head>
 <body>
-    
 
-    <ul>
+    <h3>See all the assignments in this course</h3>
+    <table>
+        <tr>
+            <th>assignment title</th>
+            <th><span style="color:red">deadline</span></th>
+        </tr>
         {% for assign in assignment %}
-        <li>
-            <a href="{{ass}}s/{{assign.id}}" >  {{assign.title}} </a> 
-            <br>
-            <span style="color:red">deadline</span> - {{assign.deadline}}
-            <br>
-            <span style="color:violet">status</span> - {{assign.status}}
-        </li>
+        <tr>
+            {% if request.user.u.identity == "student" %}
+            <td><a href="{{ass}}s/{{assign.id}}" >  {{assign.title}} </a> </td>
+            {% else %}
+            <td> <a href="{{ass}}t/{{assign.id}} "  >  {{assign.title}} </a> </td>
+            {%  endif %}
+            <td>{{assign.deadline}}</td>
+        </tr>
         {% endfor %}
-    </ul>
-
+    </table>
 
 </body>
 

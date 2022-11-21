@@ -8,11 +8,10 @@
     <title> All submissions</title>
 </head>
 <body>
-     
+    
 <form action="" method="POST">
     {% csrf_token %}
     <button type="submit">Download all submissions</button>
-    <input type="hidden" name="form_id" value="download" >
     </br>
     <a href = "http://127.0.0.1:8000/seeassignments/{{num1}}/{{num2}}/feedback" > Download csv file </a>
 </br>
@@ -23,38 +22,8 @@
         <li>
             <h1> {{s.username}} </h1>
             <br>
-            <a href="{{s.solution.url}}" download class="down" >  {{s.file_name}} </a> 
-            {% if s.feedback != "" %}
-            <br>
-            Feedback given:   {{s.feedback}}
-            <br>
-            {% endif %}
-            {% if s.marks != None %}
-            Marks given: {{s.marks}}
-            <br>
-            {% endif %}
-            <!-- {% if s.marks %}
-            {% endif %} -->
-            <form action="" method="POST"> 
-                {% csrf_token %}
-                <input type="hidden" name="form_id" value="feed" >
-                {% for field in form %}
-                <p>
-                    {% if s.feedback != "" and field.label == "Feedback" %}
-                        Update feedback:
-                    {% else %}
-
-                        {{ field.label }}: 
-                    {% endif %}
-                    <br>
-                    {{ field }}
-                </p>
-                {%  endfor %}
-                <button type="submit" name="submit" value = {{s.username}} >Add Feedback</button>
-            
-            </form>
+            <a href="{{s.solution.url}}" download class="down" onclick="func()" >  {{s.file_name}} </a> 
         </li>
-
         {% endfor %}
     </ul>
 

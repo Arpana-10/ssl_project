@@ -6,6 +6,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Create Assignment</title>
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+        </style>
 </head>
 <body>
     <a href="{{ass_file.assignmentfile.url}}",download>{{ass_file.title}}</a>
@@ -23,23 +40,30 @@
     {% endfor %}
         <button type="submit">Upload!</button>
     </form>
-
+    <small style="color: red">{{ msg }}</small>
     <h2>
         Submitted files
     </h2>
     <ul>
+        <table>
+            <tr>
+                <td>submitted file</td>
+                <td>Submitted at</td>
+                <td>status</td>
+                <td>marks</td>
+                <td>feedback</td>
+            </tr>
         {% for assign in sol %}
-        <li>
-            <a href="{{assign.solution.url}}", download >  {{assign.file_name}} </a> 
-            {{assign.created_at}}
-        </br>
-            Feedback: {{assign.feedback}}
-    </br>
-            Marks: {{assign.marks}}
-            <br>
-            
-        </li>
+        <tr>
+            <td><a href="{{assign.solution.url}}", download >  {{assign.file_name}} </a> </td>
+            <td>{{assign.created_at}}</td>
+            <td>{{assign.status}}</td>
+            <td>{{assign.marks}}</td>
+            <td>{{assign.feedback}}</td>
+        </tr>
+        
         {% endfor %}
+    </table>
     </ul>
     
 
