@@ -1,11 +1,13 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import UserProfile, courses, assignments
+from django.forms import TextInput, MultiWidget, DateTimeField
+from . import deadline
 
 
 class csv_form(forms.Form):
     csv_file = forms.FileField()
-
+    
 class solution(forms.Form):
     assignment = forms.FileField()
     name = forms.CharField(max_length=100)
@@ -14,32 +16,18 @@ class passwordchange(forms.Form):
     user_name = forms.CharField(max_length=100)
     password_final = forms.CharField(max_length=100)
 
-class feedback_form(forms.Form):
-    feedback = forms.CharField(max_length=300)
-    marks = forms.IntegerField()
 
-class assignment_form(forms.ModelForm):
-    # class Meta:
-    #     model = assignments
-    #     fields = ['assignmentfile','title','code','deadline','file_type']
-    # assignment_file = forms.FileField()
-    # title = forms.CharField(max_length = 50)
-    # code = forms.CharField( max_length = 50)
-    # deadline = forms.DateTimeField(widget=forms.SelectDateWidget)
+class assignment_form(forms.ModelForm, forms.Form):
     class Meta:
         model = assignments
-        fields = ['assignmentfile','title','code','deadline','upload_type']
-        widgets = {
-            'deadline' : forms.SelectDateWidget
-        }
-
+        fields = ['assignmentfile','title', 'upload_type']
+    deadline = DateTimeField(widget=deadline.MinimalSplitDateTimeMultiWidget())
 class course_form(forms.ModelForm):
     class Meta:
         model = courses
-        fields =  ['title', 'code','ids', ]
+        fields =  ['title', ]
         
 class course_reg(forms.Form):
-    title = forms.CharField(max_length = 50)
     code = forms.CharField( max_length = 50)
 
 class UserForm(forms.ModelForm):

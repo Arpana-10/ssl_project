@@ -11,25 +11,19 @@ class studentsubmissions(models.Model):
 	feedback = models.CharField(max_length = 300)
 	marks = models.IntegerField(blank= True, null = True)
 	created_at = models.DateTimeField(auto_now_add=True, editable=False)
+	status = models.CharField( max_length=100, default="pending") #late if submitted after deadline else success
 
 class assignments(models.Model):
 	assignmentfile = models.FileField(upload_to ='uploads/')
 	title = models.CharField( max_length = 50, unique=True)
-	code = models.CharField( max_length = 50)
-	# STATUS = (
-	# 	('pending','pending'),
-	# 	('done','done'),
-	# 	('late','late'),
-	# 	('notdone','notdone'),
-	# )
 	FILE_TYPES =(
 		('.zip','.zip'),
 		('.tgz','.tgz'),
 		('.cpp','.cpp'),
 		('.py','.py'),
 	)
-	status = models.CharField( max_length=100, default="pending")
-	deadline = models.DateTimeField(default=timezone.now)
+	# status = models.CharField( max_length=100, default="pending")
+	deadline = models.DateTimeField()
 	s =  models.ManyToManyField(studentsubmissions)
 	upload_type = models.CharField(choices=FILE_TYPES,max_length=20,default=".zip")
 
@@ -37,8 +31,8 @@ class courses(models.Model):
 	assignments = models.ManyToManyField(assignments)
 	title = models.CharField( max_length = 50)
 	code = models.CharField(max_length = 50)
-	ids = models.IntegerField(unique = True)
-	ass_n = models.IntegerField(default = 1)
+	# ids = models.IntegerField(unique = True)
+	# ass_n = models.IntegerField(default = 1)
 
 class UserProfile(models.Model):
 	user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="u")
