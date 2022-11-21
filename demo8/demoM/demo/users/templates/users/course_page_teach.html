@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> All courses</title>
+</head>
+<body>
+
+<a href= "/addassignment/{{num}}">Add Assignment</a>
+</br>
+<a href= "/seeassignments/{{num}}">See Assignment</a>
+</br>
+</br>
+
+<h4>students registered for this course</h4>
+{%  for u in users %}
+</br>
+{{u}}  --- <a href= "/deregister/{{num}}/user/{{u.id}}">Deregister</a>
+</br>
+{% endfor %}
+
+<br>
+<h3><a href="#">Invite students via email</a></h3>
+
+</body>
+</html>

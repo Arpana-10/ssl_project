@@ -1,0 +1,57 @@
+{% if user.is_authenticated %}
+
+    <div class="alert alert-success" role="alert">
+        <h3>Welcome {{ user.username }}!</h3>
+        <a href="/createcourse"> Register for a Course </a>
+        <br>
+        <a href="/allcourses/"> My Courses </a>
+        <br>
+        <a href="/updateprofile"> Edit profile </a> 
+        <br>
+        <a href="{% url 'logout' %}">Logout?</a>
+        <br>
+        <small style="color: green">{{ msg }}</small>
+
+        <p>
+            <h4> Your pending assignments</h4>
+            <ul>
+            {% for a in ass %}
+            
+                {% for i in a %}
+            {% if forloop.first %}
+            <li style='background-color:lightblue;'>{{i.title}}</li>
+            <ul>
+            {% else %}
+                        <li>{{i.title}}</li> 
+                        
+                        <br>
+                        <span style="color:red">deadline</span> - {{i.deadline}}
+                        <br>
+                        <span style="color:violet">status</span> - {{i.status}}
+
+            {% endif %}
+                
+
+
+            {% if forloop.last %}
+            
+            <ul>
+            {% endif %}
+            {% endfor %}
+            
+                </ul>
+            {% endfor %}
+            </ul>
+        </p>
+
+
+
+    </div>
+{% else %}
+    <div class="alert alert-success" role="alert">
+        <h3>Welcome!</h3>
+        <a href="{% url 'reg' %}">Signup</a>
+        <a href="{% url 'login' %}">Login</a>
+    </div>
+{% endif %}
+ 
