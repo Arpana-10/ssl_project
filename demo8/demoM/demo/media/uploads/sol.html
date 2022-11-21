@@ -1,0 +1,78 @@
+{% if user.is_authenticated %}
+
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Create Assignment</title>
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+        </style>
+</head>
+<body>
+    <a href="{{ass_file.assignmentfile.url}}",download>{{ass_file.title}}</a>
+    status: {{ass_file.status}}
+    <form action = "" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div>
+            <p>{{ field.label }}: <br> {{ field }}</p> 
+
+            {% for error in field.errors %}
+                <small style="color: red">{{ error }}</small>
+            {% endfor %}
+        </div>
+    {% endfor %}
+        <button type="submit">Upload!</button>
+    </form>
+    <small style="color: red">{{ msg }}</small>
+    <h2>
+        Submitted files
+    </h2>
+    <ul>
+        <table>
+            <tr>
+                <td>submitted file</td>
+                <td>Submitted at</td>
+                <td>status</td>
+                <td>marks</td>
+                <td>feedback</td>
+            </tr>
+        {% for assign in sol %}
+        <tr>
+            <td><a href="{{assign.solution.url}}", download >  {{assign.file_name}} </a> </td>
+            <td>{{assign.created_at}}</td>
+            <td>{{assign.status}}</td>
+            <td>{{assign.marks}}</td>
+            <td>{{assign.feedback}}</td>
+        </tr>
+        
+        {% endfor %}
+    </table>
+    </ul>
+    
+
+</body>
+</html>
+{% else %}
+    <div class="alert alert-success" role="alert">
+        <h3>Welcome!</h3>
+        <a href="{% url 'reg' %}">Signup</a>
+        <a href="{% url 'login' %}">Login</a>
+    </div>
+{% endif %}

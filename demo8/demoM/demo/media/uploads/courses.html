@@ -1,0 +1,40 @@
+{% if user.is_authenticated %}
+    {% if request.user.u.identity == "student" %}
+        <h3>Register for a Course</h3>
+    {% else %}
+        <h3>Create Course</h3>
+    {% endif %}
+    <hr>
+
+    <form action="" method="POST">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div>
+                <p>{{ field.label }}: <br> {{ field }}</p> 
+
+                {% for error in field.errors %}
+                    <small style="color: red">{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        {% if request.user.u.identity == "student" %}
+            <button type="submit">Register</button>
+        {% else %}
+            <button type="submit">Create</button>
+        {% endif %}
+
+        <br>
+        <small style="color: red">{{ Errmsg }}</small>
+        <br>
+        <small style="color: green">{{ Succmsg }}</small>
+        <br>
+        
+    </form>
+{% else %}
+    <div class="alert alert-success" role="alert">
+        <h3>Welcome!</h3>
+        <a href="{% url 'reg' %}">Signup</a>
+        <a href="{% url 'login' %}">Login</a>
+    </div>
+{% endif %}

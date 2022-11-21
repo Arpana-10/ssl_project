@@ -1,8 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import UserProfile, courses, assignments
-from django.forms import TextInput, MultiWidget, DateTimeField
-from . import deadline
 
 
 class csv_form(forms.Form):
@@ -15,17 +13,20 @@ class solution(forms.Form):
 class passwordchange(forms.Form):
     user_name = forms.CharField(max_length=100)
     password_final = forms.CharField(max_length=100)
-
+    
 class feedback_form(forms.Form):
     feedback = forms.CharField(max_length=300)
     marks = forms.IntegerField()
 
 class assignment_form(forms.ModelForm, forms.Form):
+    time = forms.TimeField()
     class Meta:
         model = assignments
-        fields = ['assignmentfile','title', 'upload_type']
-    deadline = DateTimeField(widget=deadline.MinimalSplitDateTimeMultiWidget())
-    
+        fields = ['assignmentfile','title','code','deadline' ,'upload_type']
+        widgets = {
+            'deadline' : forms.SelectDateWidget
+        }
+
 class course_form(forms.ModelForm):
     class Meta:
         model = courses

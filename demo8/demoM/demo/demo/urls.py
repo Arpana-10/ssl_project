@@ -7,7 +7,6 @@ from . import settings
 
 
 urlpatterns = [
-    path('invite/<int:num>', user_views.email_invite ),
     path('deregister/<int:num>/user/<int:uid>', user_views.deregister_view),
     path('seeassignments/<int:num1>/<int:num2>/feedback', user_views.export_to_csv),
     path('seeassignments/<int:num1>/<int:num2>/marks', user_views.marks),
