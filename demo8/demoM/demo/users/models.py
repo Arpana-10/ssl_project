@@ -14,6 +14,8 @@ class studentsubmissions(models.Model):
 	status = models.CharField( max_length=100, default="pending") #late if submitted after deadline else success
 
 class assignments(models.Model):
+	autograder = models.FileField(upload_to ='uploads/')
+	Tree = models.FileField(upload_to='uploads/')
 	assignmentfile = models.FileField(upload_to ='uploads/')
 	title = models.CharField( max_length = 50, unique=True)
 	FILE_TYPES =(

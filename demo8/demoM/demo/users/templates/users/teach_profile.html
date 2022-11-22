@@ -1,24 +1,30 @@
+{% extends "users/base.html" %}
+
+{% block title %}My amazing blog{% endblock %}
+
+{% block content %}
+
 {% if user.is_authenticated %}
-    <div class="alert alert-success" role="alert">
-        <h3>Welcome {{ user.username }}!</h3>
-        <br>
-        <a href= "/createcourse"> Create new course </a>
-        <br>
-        <a href="/allcourses/"> All courses </a>
-        <br>
-        <a href="/updateprofile"> Edit profile </a>
-        <br>
-        <a href="{% url 'logout' %}">Logout?</a>
-        <br>
-        <small style="color: green">{{ msg }}</small>
-        <br>
 
+    <div  class="alert alert-success" role="alert">
+        <h3>Welcome <span style="color: blue;">{{ user.username }}</span>>!</h3>
+        <br>
+        <div>
+            <ul>
+            <li><a href= "/createcourse"> Create new course </a></li>
+            <br>
+            <li><a href="/allcourses/"> All courses </a></li>
+            <br>
+            <li><a href="/updateprofile"> Edit profile </a></li>
+            <br>
+            <li><a href="{% url 'logout' %}">Logout?</a></li>
+            <br>
+            </ul>
+            <small style="color: green">{{ msg }}</small>
+            <br>
+        </div>
 
     </div>
-{% else %}
-    <div class="alert alert-success" role="alert">
-        <h3>Welcome!</h3>
-        <a href="{% url 'reg' %}">Signup</a>
-        <a href="{% url 'login' %}">Login</a>
-    </div>
+
 {% endif %}
+{% endblock %}

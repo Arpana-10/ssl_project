@@ -23,7 +23,7 @@ class feedback_form(forms.Form):
 class assignment_form(forms.ModelForm, forms.Form):
     class Meta:
         model = assignments
-        fields = ['assignmentfile','title', 'upload_type']
+        fields = ['assignmentfile','title', 'upload_type','autograder', 'Tree']
     deadline = DateTimeField(widget=deadline.MinimalSplitDateTimeMultiWidget())
     
 class course_form(forms.ModelForm):

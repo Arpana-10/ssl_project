@@ -1,38 +1,18 @@
-{% if user.is_authenticated %}
-<!DOCTYPE html>
+{% extends "users/base.html" %}
 
-<html lang = "en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> All courses</title>
-    <style>
-        table {
-          font-family: arial, sans-serif;
-          border-collapse: collapse;
-          width: 100%;
-        }
-        
-        td, th {
-          border: 1px solid #dddddd;
-          text-align: left;
-          padding: 8px;
-        }
-        
-        tr:nth-child(even) {
-          background-color: #dddddd;
-        }
-        </style>
-</head>
-<body>
+{% block content %}
+
+{% if user.is_authenticated %}
+
     
-    <h1> ALL courses </h1> 
+    <h2> All Courses </h2> 
     {% if request.user.u.identity == "teacher" %}
     <table>
         <tr>
             <th>course title</th>
             <th>course code</th>
             <th> </th>
+            <th></th>
             <th></th>
         </tr>
         {% for course in courses_added%}
@@ -50,7 +30,7 @@
     <table>
         <tr>
             <th>course title</th>
-            <th></th>
+            <th>options</th>
         </tr>
         {% for course in courses_added%}
             <tr>
@@ -61,16 +41,8 @@
         {% endfor %} 
     </table>
     {% endif %}
-</body>
-</html>
- 
-{% else %}
-    <div class="alert alert-success" role="alert">
-        <h3>Welcome!</h3>
-        <a href="{% url 'reg' %}">Signup</a>
-        <a href="{% url 'login' %}">Login</a>
-    </div>
+
 {% endif %}
 
 
-
+{% endblock %}

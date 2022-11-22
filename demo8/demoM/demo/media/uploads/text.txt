@@ -1,0 +1,8 @@
+folder1
+├── q1
+│   ├── q1a.py
+│   └── q1b.py
+└── q2
+    └── q2a.py
+
+2 directories, 3 files

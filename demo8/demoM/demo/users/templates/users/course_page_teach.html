@@ -1,29 +1,27 @@
-<!DOCTYPE html>
+{% extends "users/base.html" %}
 
-<html lang = "en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> All courses</title>
-</head>
-<body>
-{%  if request.user.u.identity == "teacher" %}
+{% block content %}
 
-<h4>students registered for this course</h4>
-<table>
+{% if user.is_authenticated %}
+<div>
+    {%  if request.user.u.identity == "teacher" %}
+
+    <h4>students registered for this course</h4>
+    <table>
+        <tr>
+            <th> student name</th>
+            <th> options </th>
+        </tr>
+    {%  for u in users %}
     <tr>
-        <th> student name</th>
-        <th> options </th>
+    <td>{{u}}</td>
+    <td><a href= "/deregister/{{num}}/user/{{u.id}}">Deregister</a></td>
     </tr>
-{%  for u in users %}
-<tr>
- <td>{{u}}</td>
- <td><a href= "/deregister/{{num}}/user/{{u.id}}">Deregister</a></td>
-</tr>
-{% endfor %}
-</table>
-<br>
-<h3><a href="#">Invite students via email</a></h3>
+    {% endfor %}
+    </table>
+    <br>
+    <h3><a href="#">Invite students via email</a></h3>
+    {% endif %}
+</div>
 {% endif %}
-</body>
-</html>
+{% endblock %}

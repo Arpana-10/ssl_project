@@ -18,6 +18,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 import datetime
 from time import gmtime, strftime
+import subprocess
 
 def home(request):
     try:
@@ -80,16 +81,18 @@ def createassignment(request, num):
             doc = request.FILES
             doc_name = doc["assignmentfile"]
             x = courses.objects.get(id = num)
-            # n = x.ass_n
-            # dead = datetime.datetime.combine(submitted_form.cleaned_data['deadline'], submitted_form.cleaned_data['time']) 
-            # print(dead, "----------")
-            course_added = assignments(assignmentfile = doc_name, title = submitted_form.cleaned_data["title"], deadline = submitted_form.cleaned_data['deadline'], upload_type = submitted_form.cleaned_data['upload_type'] )
-            course_added.save()
-            x.assignments.add(course_added)
-            # x.ass_n = n+1
-            print(course_added.deadline, "-----")
-            x.save()
-            Succmsg = "Successfully created"
+            tree = submitted_form.cleaned_data['Tree']
+            auto = submitted_form.cleaned_data['autograder']
+            if tree.name.endswith('.txt') :
+                course_added = assignments(assignmentfile = doc_name, title = submitted_form.cleaned_data["title"], deadline = submitted_form.cleaned_data['deadline'], upload_type = submitted_form.cleaned_data['upload_type'], autograder = auto, Tree = tree )
+                course_added.save()
+                x.assignments.add(course_added)
+                # x.ass_n = n+1
+                print(course_added.deadline, "-----")
+                x.save()
+                Succmsg = "Successfully created"
+            else:
+                Errmsg = "upload the tree structure in a .txt file"
             #print( current_user.usercurrent_user = request.username)
             # return render(request, "users/teach_profile.html")
         else:
@@ -262,6 +265,48 @@ def solution_upload(request, num1, num2):
                 # 20221121111714 check
                 # 20221121113337 try1
                 x.save()
+                
+                zipf = studentsubmissions.objects.get(id = s.id).solution
+                autograder = x.assignments.get(id = num2).autograder
+                tree = x.assignments.get(id = num2).Tree
+
+                name = doc_name.name[:-4]
+                command1 = f"unzip media/{zipf} -d ./submissions/"
+                
+                # print(name, command1)
+                p1 = subprocess.run(command1, capture_output=True, shell=True)
+                command2 = "cd submissions/;ls"
+                p2 = subprocess.run(command2, capture_output=True, shell=True)
+                dirname = p2.stdout.decode().strip("\n")
+                command3 = "cd submissions/;tree -a "+ dirname +" > test.txt; diff test.txt "+str(tree.file)
+                # print(dirname, command3, sep=", ")
+                p3 = subprocess.run(command3, capture_output=True, shell=True)
+                output = p3.stdout.decode()
+
+                if output != "":
+                    msg = "tree structure not matching , check again"
+                    studentsubmissions.objects.filter(id = s.id).update(marks = 0)
+                    studentsubmissions.objects.filter(id = s.id).update(feedback = msg)  
+                else:
+                    print(dir, "yayaaa")  
+                    msg = "tree structer matched"
+                    command = "cd submissions/;python3 "+str(autograder.file)+" "+dirname
+                    obj = subprocess.run(command, capture_output=True, shell=True)
+                    output = obj.stdout.decode()
+                    l = []
+                    list = output.splitlines()
+                    for item in list:
+                        a = item.split(" : ")
+                        l.append(a)
+                    print(l)
+                    studentsubmissions.objects.filter(id = s.id).update(marks = l[0][1])
+                    studentsubmissions.objects.filter(id = s.id).update(feedback = l[2][1])
+                finalcomm = "cd submissions/;rm -r "+dirname+"; rm test.txt"
+                subprocess.run(finalcomm,shell=True)
+                # provide submission as a command line argument
+                # assumptions : the autograder will not unzip the file , i am unzipping and storing it ia temporary directory 
+                # running the autograder on that file and processing the output
+                # finally deleting the submitted folder since zip file is already there in media/uploads/
                 # provide submission as a command line argument
 
     current_user = request.user
