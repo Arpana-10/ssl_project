@@ -7,7 +7,8 @@ We have created a portal where users can register themselves as student or teach
 
 ## TechStack
 
-**Django (Python)** : for both frontend and backend, however designed the frontend UI using HTML and CSS 
+**Django (Python)** : for both frontend and backend, however designed the frontend UI using HTML and CSS
+
 **SQLite (as database)**: for data storage  
 
 ## Commands to operate
