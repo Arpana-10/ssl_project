@@ -2,7 +2,7 @@
 
 ## Overview
 
-We have created a portal where users can register as a student or teacher and based on their identity, based on their identity they can perform different tasks, like a teacher can create courses and assignments, impose deadlines for each assignment, see the submissions made by the students, update marks and feedback for any student for each assignment and many more. Students can register themselves for a course by a unique Course code(shared by teacher), make multiple submissions to assignments of a registered course however only last submitted solution will be considered for grading, and the submissions will be evaluated at the time of submission itself, so that students can improve thier solutions and more to explore. However all these functionalites are accessable in authenticated sessions only.
+We have created a portal where users can register as a student or teacher and based on their identity they can perform different tasks, like a teacher can create courses and assignments, impose deadlines for each assignment, see the submissions made by the students, update marks and feedback for any student for each assignment and many more. Students can register themselves for a course by a unique Course code(shared by teacher), make multiple submissions to assignments of a registered course however only last submitted solution will be considered for grading, and the submissions will be evaluated at the time of submission itself, so that students can improve thier solutions and more to explore. However all these functionalites are accessable in authenticated sessions only.
 
 
 ## TechStack
