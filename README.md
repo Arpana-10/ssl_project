@@ -33,7 +33,7 @@ migrate executes those SQL commands in the database file. So after executing mig
 `python3 manage.py runserver`
 
 This starts the Django development server. Now that the server’s running, visit http://127.0.0.1:8000/ with your web browser. 
-> Note: For this project port 8000 is needed to be used, since some views redirects to urls with port 8000.
+
 
 ## Features implemented
 
@@ -81,7 +81,8 @@ As soon as a student uploads a solution, first the file type gets verified and i
 
 #### Tree Structure check
 
-As soon as a student uploads a solution, first the file type gets verified and if the file type is **.zip** or **.tgz**, the tree structure for that submission gets verified and the marks and feedback for that submission gets updated accordingly.
+As soon as a student uploads a solution, first the file type gets verified and if the file type is **.zip** or **.tgz**, the tree structure for that submission gets verified and the marks and feedback for that submission gets updated accordingly. 
+> `Note:` The students are required to put all the required files and folders inside a folder and compress that **single** folder to any required type extension and then make submission of the created archive file.
 
 #### Pending Assignments
 
@@ -94,4 +95,4 @@ A teacher can deregister any student registered for a course from that course.
 
 ## Conclusion
 
-Our portal is going to be the **moodle** of future generations. :D
+Our portal is going to be the **moodle** of future generations :P
