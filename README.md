@@ -2,12 +2,12 @@
 
 ## Overview
 
-We have created a portal where users can register themselves as student or teacher and based on their identity, can  access certain performance, like a teacher can create courses and assignments, impose deadlines for each assignment, access the submissions made by the students, update marks and feedback for any student for each assignment and many more. Similarly students can register themselves for any course by providing a unique code, make multiple submissions to any assignment of any registered course however only last submitted solutions counts, get their submissions evaluated automatically to know at that instance only if their is anything they can improve in thier solutions and more to explore. However all these functionalites are provide in authenticated sessions only.
+We have created a portal where users can register as a student or teacher and based on their identity, based on their identity they can perform different tasks, like a teacher can create courses and assignments, impose deadlines for each assignment, see the submissions made by the students, update marks and feedback for any student for each assignment and many more. Students can register themselves for a course by a unique Course code(shared by teacher), make multiple submissions to assignments of a registered course however only last submitted solution will be considered for grading, and the submissions will be evaluated at the time of submission itself, so that students can improve thier solutions and more to explore. However all these functionalites are accessable in authenticated sessions only.
 
 
 ## TechStack
 
-**Django (Python)** : for both frontend and backend, however designed the frontend UI using HTML and CSS
+**Django (Python)** : for both frontend and backend, however designed the frontend UI using HTML, CSS and Java script
 
 **SQLite (as database)**: for data storage  
 
@@ -46,27 +46,26 @@ Then users get redirected to specific homepage, depending on whether the identit
 
 #### Profile Update
 
-Users are able to change their passwords, only if they provide correect initial password.
+Users will be able to change their passwords, only if they provide correect initial password.
 
 #### Create Course and Assignment
 
-Users with identity as teacher can create a course by providing the title for the course and a unique code gets generated for the course, which can be used by other users to register for the course. The user can create assignments for each course. Creating an assignment requires a assignment file (problem statement), name of the assignment, specifying the file type to be uploaded as solution for that assignment, if the required filetype is **.zip** or **.tgz** then a a text file with the output of **tree command** for the submission, else if the required filetype is **.sh** then a **.zip** file consisting of the test cases and autograder script (**.sh** file) as the **autograder** and finally specifying the deadline for that assignment.  
+Users with identity as teacher can create a course by providing the title for the course and a unique code gets generated for the course, which can be used by other users to register for the course. The teacher can create assignments for each course. Creating an assignment requires a assignment file (problem statement), name of the assignment, specifying the file type to be uploaded as solution for that assignment, if the required filetype is **.zip** or **.tgz** then a a text file with the output of **tree command** for the submission, else if the required filetype is **.sh** then a **.zip** file consisting of the test cases and autograder script (**.sh** file) as the **autograder** and finally specifying the deadline for that assignment.  
 
 #### Download all the submissions
 
-Teacher can download each submission made for an assignment individually as well as  all together in zip file
+Teacher can download each submission made for an assignment individually as well as  all together in a zip file
 
 #### Update marks and Feaadback for each submission via a CSV file 
 
-Teacher can download the marks and feedback of all students in a **CSV** file and udate their marks and feedback then upload that updated CSV file to update the marks and feedback for each submission in the database and on the rendered page
-
+Teacher can download the marks and feedback of all students in a **CSV** file and udate their marks and feedback and then upload the updated CSV file to update the marks and feedback for each submission in the database.
 #### Update marks and Feeadback for each assignment via the website
 
 Teacher can just fill the feeback and marks form form for any assignment to update it on the go.
 
 #### Register for a course
 
-Users with identity as student can register themselves for a course by providing the **code** for that course.
+Users with identity as student can register themselves for a course by having the **code** for that course.
 
 #### Access all assignments and Upload solutions
 
@@ -95,4 +94,4 @@ A teacher can deregister any student registered for a course from that course.
 
 ## Conclusion
 
-Our portal is going to be the **moodle** of future generations. :P
+Our portal is going to be the **moodle** of future generations. :D
