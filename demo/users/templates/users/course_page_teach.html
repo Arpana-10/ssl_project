@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> All courses</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <style>
+        h3{
+            padding: 60px;
+        }
+        body{
+            text-align: center;
+        }
+        table {
+            margin-left: auto;
+            margin-right: auto;
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 800px;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+        .x{
+          margin: auto;
+          padding-top: 5%;
+          width : 50%;
+        }
+        </style>
+
+</head>
+<body>
+  <div class = "x">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    </div>
+{%  if request.user.u.identity == "teacher" %}
+
+<h3>students registered for this course</h3>
+<table>
+    <tr>
+        <th> student name</th>
+        <th> options </th>
+    </tr>
+{%  for u in users %}
+<tr>
+ <td>{{u}}</td>
+ <td><a href= "/deregister/{{num}}/user/{{u.id}}">Deregister</a></td>
+</tr>
+{% endfor %}
+</table>
+<br>
+<h3>Message Students for registration</h3>
+<table>
+  <tr>
+      <th> student name</th>
+      <th> Message </th>
+  </tr>
+{%  for s in students  %}
+<tr>
+ <td>{{s.user_name}}</td>
+ <td><a href= "/{{num}}/{{s.id}}">Send message</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+<p>
+<a style = "margin: 20px"class="btn btn-primary" href="/{{num}}/all" role="button">Send message to all</a>
+</p>
+</body>
+</html>

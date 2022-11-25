@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html lang = "en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> All assignments</title>
+    <style>
+        h3{
+            padding: 60px;
+        }
+        body{
+            text-align: center;
+            margin: auto;
+
+        }
+        table {
+            margin-left: auto;
+            margin-right: auto;
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 600px;
+          font-size: 16px;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+          font-size: 18px;
+        }
+        th {
+            font-size: 23px; 
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+        </style>
+</head>
+<body>
+
+    <h3>See all the assignments in this course</h3>
+    <table>
+        <tr>
+            <th>Assignment Title</th>
+            <th><span style="color:red">Deadline</span></th>
+        </tr>
+        {% for assign in assignment %}
+        <tr>
+            {% if request.user.u.identity == "student" %}
+            <td><a href="{{ass}}s/{{assign.id}}" >  {{assign.title}} </a> </td>
+            {% else %}
+            <td> <a href="{{ass}}t/{{assign.id}} "  >  {{assign.title}} </a> </td>
+            {%  endif %}
+            <td>{{assign.deadline}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+
+</html>

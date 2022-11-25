@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> All submissions</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+		
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 1200px;
+		  justify-content: center;
+		  margin-left: 20%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+        
+* { box-sizing: border-box; }
+
+body { 
+  font-family: 'Open Sans', sans-serif;
+  color: #666;
+}
+
+/* STRUCTURE */
+
+.wrapper {
+	padding: 5px;
+	max-width: 960px;
+	width: 95%;
+	margin: 20px auto;
+}
+header {
+	padding: 0 15px;
+}
+
+.columns {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	margin: 5px 0;
+}
+
+.column {
+	flex: 1;
+	border: 1px solid gray;
+	margin: 2px;
+	padding: 10px;
+	&:first-child { margin-left: 0; }
+	&:last-child { margin-right: 0; }
+	
+}
+
+footer {
+	padding: 0 15px;
+}
+
+
+@media screen and (max-width: 980px) {
+  .columns .column {
+		margin-bottom: 5px;
+    flex-basis: 40%;
+		&:nth-last-child(2) {
+			margin-right: 0;
+		}
+		&:last-child {
+			flex-basis: 100%;
+			margin: 0;
+		}
+	}
+}
+
+@media screen and (max-width: 680px) {
+	.columns .column {
+		flex-basis: 100%;
+		margin: 0 0 5px 0;
+	}
+}
+.k{
+	justify-content: center;
+}
+
+    </style>
+</head>
+    
+<body>
+    <form action="" method="POST">
+		{% csrf_token %}
+		<input type="hidden" name="form_id" value="download" >
+<div class="wrapper">
+
+	<header>
+		<h1>All Submissions</h1>
+		
+		<h3>  Assignment File: <a href = "{{assign.assignmentfile.url}}" download> {{assign.title}} </a></h3>
+	</header>
+		
+<section class="columns">
+	
+	<div class="column">
+		
+		<h2><button type="submit" class="btn btn-light">Download all submissions</button> </h2>
+		<p>Download all the student submissions in zip format</p>
+	</div>
+	
+	<div class="column">
+		<h2> <a href = "http://127.0.0.1:8000/seeassignments/{{num1}}/{{num2}}/feedback" > Download csv file </a></h2>
+        <p> Download the csv file by clicking on the link, you can update marks and feedback in this file. </p>
+	</div>
+  
+  <div class="column">
+		<h2> <a href = "http://127.0.0.1:8000/seeassignments/{{num1}}/{{num2}}/marks" > upload marks and feedback by downloading beside csv file </a></h2>
+        <p> Upload the feedback and marks for the assignment solutuions uploaded so far </p>
+	</div>
+	
+</section>	
+</form>
+</div>
+<div class="k">
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Solution</th>
+		<th>Feedback</th>
+		<th>Marks</th>
+		<th> Status </th>
+		<th>Update Feedback</th>
+		<th>Update Marks</th>
+		<th>button</th>
+		
+	</tr>
+
+    {% for s in sol %}
+    <tr>
+
+		<td> {{s.username}} </td>
+			
+		<td>
+
+			<a href="{{s.solution.url}}" download class="down"  >  {{s.file_name}} </a> 
+		</td>	
+		
+		<td>
+
+			{{s.feedback}}
+		</td>
+		<td>
+
+			{{s.marks}}
+		</td>
+		<td>
+			{{s.status}}
+		</td>
+		<form action="" method="POST"> 
+			{% csrf_token %}
+			<input type="hidden" name="form_id" value="feed" >
+			{% for field in form %}
+				<td>{{ field }}</td>
+			{%  endfor %}
+			<td><button type="submit" name="submit" value = {{s.username}} >Add Feedback</button></td>
+		
+		</form>
+	</tr>
+
+	</table>
+
+    {% endfor %}	
+
+</div>
+
+</body>
+
+</html>
