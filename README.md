@@ -61,7 +61,7 @@ Teacher can download each submission made for an assignment individually as well
 Teacher can download the marks and feedback of all students in a **CSV** file and update their marks and feedback and then upload the updated CSV file to update the marks and feedback for each submission in the database.
 #### Update marks and Feeadback for each assignment via the website
 
-Teacher can just fill the feeback and marks form form for any assignment to update it on the go.
+Teacher can just fill the feeback and marks form for any assignment to update it on the go.
 
 #### Register for a course
 
@@ -92,7 +92,9 @@ In the homepage students can see all the assignments of all the courses it has r
 
 A teacher can deregister any student registered for a course from that course.
 
+#### Message Students
 
+A teacher can send code to the student via automated message, which student can view on their home page under messages. Student can also clear all the messages he recieved. 
 ## Conclusion
 
 Our portal is going to be the **moodle** of future generations :P
