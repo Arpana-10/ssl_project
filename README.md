@@ -86,7 +86,7 @@ As soon as a student uploads a solution, first the file type gets verified and i
 
 #### Pending Assignments
 
-In the homepage students can see all the assignments of all the courses it has registered for, which are still due (no submission made and the deadline is not yet over) 
+In the homepage students can see all the assignments of all the courses student has registered for, which are still due (no submission made and the deadline is not yet over) in the sorted order of the deadline.
 
 #### Deregister Students
 
@@ -94,7 +94,8 @@ A teacher can deregister any student registered for a course from that course.
 
 #### Message Students
 
-A teacher can send code to the student via automated message, which student can view on their home page under messages. Student can also clear all the messages he recieved. 
+A teacher can send code to the unregistered student via automated message, which student can view on their home page under messages. Student can also clear all the messages student recieved.
+
 ## Conclusion
 
 Our portal is going to be the **moodle** of future generations :P
