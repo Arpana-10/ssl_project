@@ -56,9 +56,9 @@ Users with identity as teacher can create a course by providing the title for th
 
 Teacher can download each submission made for an assignment individually as well as  all together in a zip file
 
-#### Update marks and Feaadback for each submission via a CSV file 
+#### Update marks and Feedback for each submission via a CSV file 
 
-Teacher can download the marks and feedback of all students in a **CSV** file and udate their marks and feedback and then upload the updated CSV file to update the marks and feedback for each submission in the database.
+Teacher can download the marks and feedback of all students in a **CSV** file and update their marks and feedback and then upload the updated CSV file to update the marks and feedback for each submission in the database.
 #### Update marks and Feeadback for each assignment via the website
 
 Teacher can just fill the feeback and marks form form for any assignment to update it on the go.
