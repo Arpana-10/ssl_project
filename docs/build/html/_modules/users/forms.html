@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>users.forms &mdash; Portal for Courses  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Portal for Courses
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">demo</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Portal for Courses</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>users.forms</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for users.forms</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">UserProfile</span><span class="p">,</span> <span class="n">courses</span><span class="p">,</span> <span class="n">assignments</span>
+<span class="kn">from</span> <span class="nn">django.forms</span> <span class="kn">import</span> <span class="n">TextInput</span><span class="p">,</span> <span class="n">MultiWidget</span><span class="p">,</span> <span class="n">DateTimeField</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">deadline</span>
+
+
+<div class="viewcode-block" id="csv_form"><a class="viewcode-back" href="../../users.html#users.forms.csv_form">[docs]</a><span class="k">class</span> <span class="nc">csv_form</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and simply provides a form to upload the csv file (to update marks and give feedback to students)</span>
+<span class="sd">    :param csv_file: This variable contain the csv file to be uploaded by the teacher</span>
+<span class="sd">    :type csv_file: forms.FileField</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">csv_file</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">FileField</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="solution"><a class="viewcode-back" href="../../users.html#users.forms.solution">[docs]</a><span class="k">class</span> <span class="nc">solution</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and provides a form to upload the solution to a particular assignment.</span>
+<span class="sd">    :param assignment: This variable contains the solution file uploaded by the user to the assignment</span>
+<span class="sd">    :type assignment: forms.FileField</span>
+<span class="sd">    :param name: This variable stores the name of the submission done by the student</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">assignment</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">FileField</span><span class="p">()</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="passwordchange"><a class="viewcode-back" href="../../users.html#users.forms.passwordchange">[docs]</a><span class="k">class</span> <span class="nc">passwordchange</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and provides a form to change password of the user</span>
+<span class="sd">    :param password_initial: This variable stores the initial password of the user</span>
+<span class="sd">    :type password_initial: str</span>
+<span class="sd">    :param password_final: This variable stores the final password of the user</span>
+<span class="sd">    :type password_final: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">password_initial</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">password_final</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="feedback_form"><a class="viewcode-back" href="../../users.html#users.forms.feedback_form">[docs]</a><span class="k">class</span> <span class="nc">feedback_form</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and provides a form to upload marks and feedback to a submission to the assignment</span>
+<span class="sd">    :param feedback: This variable stores the feedback to be uploaded to the submission</span>
+<span class="sd">    :type feedback: str</span>
+<span class="sd">    :param marks: This variable stores the marks to be uploaded to the submission</span>
+<span class="sd">    :type marks: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">feedback</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">marks</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="assignment_form"><a class="viewcode-back" href="../../users.html#users.forms.assignment_form">[docs]</a><span class="k">class</span> <span class="nc">assignment_form</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">,</span> <span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and provides a form to teacher to upload an assignment</span>
+<span class="sd">    :param assignmentfile: This variable contains the assignment file which is  uploaded by the teacher</span>
+<span class="sd">    :type assignmentfile: forms.FileField</span>
+<span class="sd">    :param title: This variable contains the title of the uploaded file by teacher</span>
+<span class="sd">    :type title: str</span>
+<span class="sd">    :param upload_type: This variable contains the type of file to be uploaded by the student </span>
+<span class="sd">    :type upload_type: str</span>
+<span class="sd">    :param Treestructure: This variable contains the file which contains the structure of the directory to be matched by user while making a submission</span>
+<span class="sd">    :type Treestructure: forms.FileField</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="assignment_form.Meta"><a class="viewcode-back" href="../../users.html#users.forms.assignment_form.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">assignments</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;assignmentfile&#39;</span><span class="p">,</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;upload_type&#39;</span><span class="p">,</span> <span class="s1">&#39;Treestructure&#39;</span><span class="p">,</span> <span class="s1">&#39;autograder&#39;</span><span class="p">]</span></div>
+    <span class="n">deadline</span> <span class="o">=</span> <span class="n">DateTimeField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">deadline</span><span class="o">.</span><span class="n">MinimalSplitDateTimeMultiWidget</span><span class="p">())</span></div>
+<div class="viewcode-block" id="course_form"><a class="viewcode-back" href="../../users.html#users.forms.course_form">[docs]</a><span class="k">class</span> <span class="nc">course_form</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and provides a form for teacher to upload an assignment</span>
+<span class="sd">    :param title: This variable contains the title of the course which is being created by teacher</span>
+<span class="sd">    :type title: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="course_form.Meta"><a class="viewcode-back" href="../../users.html#users.forms.course_form.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">courses</span>
+        <span class="n">fields</span> <span class="o">=</span>  <span class="p">[</span><span class="s1">&#39;title&#39;</span> <span class="p">]</span></div></div>
+        
+<div class="viewcode-block" id="course_reg"><a class="viewcode-back" href="../../users.html#users.forms.course_reg">[docs]</a><span class="k">class</span> <span class="nc">course_reg</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and provides a form for students to register for a course</span>
+<span class="sd">    :param code: This variable contains the code of the course which the user is registering to</span>
+<span class="sd">    :type code: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span> <span class="n">max_length</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UserForm"><a class="viewcode-back" href="../../users.html#users.forms.UserForm">[docs]</a><span class="k">class</span> <span class="nc">UserForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and provides a form for users to register themselves in the database</span>
+
+<span class="sd">    :param username: This variable stores the username of the user, which is unique for each user</span>
+<span class="sd">    :type username: str</span>
+<span class="sd">    :param email: This variable stores the email address of the user </span>
+<span class="sd">    :type email: str</span>
+<span class="sd">    :param password: This variable stores the password for the user to login</span>
+<span class="sd">    :type password: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">PasswordInput</span><span class="p">)</span>
+    <span class="n">confirm_password</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">PasswordInput</span><span class="p">())</span>
+<div class="viewcode-block" id="UserForm.Meta"><a class="viewcode-back" href="../../users.html#users.forms.UserForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">help_texts</span> <span class="o">=</span> <span class="p">{</span>
+	    	<span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="s1">&#39;Enter your College Roll No.&#39;</span><span class="p">,</span>
+		<span class="p">}</span> 
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">]</span></div>
+<div class="viewcode-block" id="UserForm.clean"><a class="viewcode-back" href="../../users.html#users.forms.UserForm.clean">[docs]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cleaned_data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">UserForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">)</span>
+        <span class="n">confirm_password</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;confirm_password&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">password</span> <span class="o">!=</span> <span class="n">confirm_password</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">forms</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;password does not match&quot;</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="UserProfileForm"><a class="viewcode-back" href="../../users.html#users.forms.UserProfileForm">[docs]</a><span class="k">class</span> <span class="nc">UserProfileForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class inherits from Django&#39;s forms and provides a form for users to register themselves on the database</span>
+<span class="sd">    :param full_name: This variable contains the full name of the user</span>
+<span class="sd">    :type full_name: str</span>
+<span class="sd">    :param roll_no: This variable contains the roll number of the user, which is unique for each user</span>
+<span class="sd">    :type roll_no: str</span>
+<span class="sd">    :param identity: This variable contains the identity of the user i.e. whether the user is a student or a teacher</span>
+<span class="sd">    :type identity: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="UserProfileForm.Meta"><a class="viewcode-back" href="../../users.html#users.forms.UserProfileForm.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">UserProfile</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;full_name&#39;</span><span class="p">,</span> <span class="s1">&#39;roll_no&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="s1">&#39;identity&#39;</span><span class="p">,]</span></div></div>
+
+<div class="viewcode-block" id="register_student_for_course"><a class="viewcode-back" href="../../users.html#users.forms.register_student_for_course">[docs]</a><span class="k">class</span> <span class="nc">register_student_for_course</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">user_name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">roll_no</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Arpana Prajapati, Palle Bhavana, Nikhil Verma.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

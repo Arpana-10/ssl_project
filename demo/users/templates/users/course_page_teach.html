@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> All courses</title>
+    <title> All students</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
     <style>
@@ -66,7 +66,7 @@
 <h3>Message Students for registration</h3>
 <table>
   <tr>
-      <th> student name</th>
+      <th> Student Name</th>
       <th> Message </th>
   </tr>
 {%  for s in students  %}
@@ -78,7 +78,9 @@
 </table>
 {% endif %}
 <p>
-<a style = "margin: 20px"class="btn btn-primary" href="/{{num}}/all" role="button">Send message to all</a>
+  <a style = "margin: 20px"class="btn btn-primary" href="/{{num}}/all" role="button">Send message to all</a>
+  <br>
+  <h3><a href ="/addstudent/{{num}}">Register students for this course</a></h3><br>
 </p>
 </body>
 </html>

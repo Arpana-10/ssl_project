@@ -3,7 +3,7 @@
     <head>
       <link href='https://fonts.googleapis.com/css?family=Raleway:400, 600' rel='stylesheet' type='text/css'>
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-      <title>Profile</title>
+      <title>Home Page</title>
     <style>
       .table {
         margin-left: auto;
@@ -220,6 +220,7 @@
                 <tr>
                   
                   <th scope="col">Assignment</th>
+                  <th scope="col">Course</th>
                   <th scope="col">Deadline</th>
                 </tr>
               </thead>
@@ -231,7 +232,8 @@
                 <tbody>
                 <tr>
                     
-                    <td>{{i.title}}</td>        
+                  <td><a href="http://127.0.0.1:8000/seeassignments/{{a.0.id}}/s/{{i.id}}" style="color:blue";>{{i.title}}</a></td>        
+                  <td>     {{a.0.title}} </td>
                     <td><span style="color:red">deadline</span> - {{i.deadline}}</td>
                 </tr>
               </tbody>

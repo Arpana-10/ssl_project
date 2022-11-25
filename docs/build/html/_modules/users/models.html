@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>users.models &mdash; Portal for Courses  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Portal for Courses
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">demo</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Portal for Courses</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>users.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for users.models</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">Permission</span><span class="p">,</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+
+
+<div class="viewcode-block" id="studentsubmissions"><a class="viewcode-back" href="../../users.html#users.forms.studentsubmissions">[docs]</a><span class="k">class</span> <span class="nc">studentsubmissions</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This model contains all the information and field of data associated with submissions made by students to various assignments.</span>
+
+<span class="sd">	:param username: This variable contains the username of the student who has made this submission</span>
+<span class="sd">	:type username: str</span>
+<span class="sd">	:param solution: This variable contains the solution file uploaded by the student</span>
+<span class="sd">	:type solution: models.FileField</span>
+<span class="sd">	:param file_name: This variable stores the name of the file uploaded by the student</span>
+<span class="sd">	:type file_name: str</span>
+<span class="sd">	:param feedback: This variable contains the feedback given by teacher(or autograder) to the student for this assignment submission</span>
+<span class="sd">	:type feedback: str</span>
+<span class="sd">	:param marks: This variable contains the marks given by teacher(or autograder) to the student for this assignment submission</span>
+<span class="sd">	:type marks: int</span>
+<span class="sd">	:param created_at: This variable contains the information about the date and time on which the submission was done</span>
+<span class="sd">	:type created_at: models.DateTimeField</span>
+<span class="sd">	:param status: This variable contains the status of the submission(whether it was submitted before deadline or after deadline)</span>
+<span class="sd">	:type status: str</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">username</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">50</span> <span class="p">)</span>
+	<span class="n">solution</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span> <span class="o">=</span><span class="s1">&#39;uploads/&#39;</span><span class="p">)</span>
+	<span class="n">file_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+	<span class="n">feedback</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">300</span><span class="p">)</span>
+	<span class="n">marks</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">null</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+	<span class="n">created_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+	<span class="n">status</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;pending&quot;</span><span class="p">)</span> <span class="c1">#late if submitted after deadline else success</span></div>
+
+<div class="viewcode-block" id="assignments"><a class="viewcode-back" href="../../users.html#users.forms.assignments">[docs]</a><span class="k">class</span> <span class="nc">assignments</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This model contains all the information and fields of data associated with assignments which we are storing.\n</span>
+<span class="sd">	:param assignmentfile: This variable stores the assignment file uploaded by the teacher</span>
+<span class="sd">	:type assignmentfile: models.FileField</span>
+<span class="sd">	:param Treestructure: This variable stores the tree structure file that is supposed to be matched by the user for .zip and .tgz files</span>
+<span class="sd">	:type Treestructure: models.FileField</span>
+<span class="sd">	:param title: This variable stores the title of the assignment file uploaded by the teacher</span>
+<span class="sd">	:type title: str</span>
+<span class="sd">	:param deadline: This variable stores the deadline of the assignment to be submitted</span>
+<span class="sd">	:type deadline: models.DateTimeField</span>
+<span class="sd">	:param s: This variable stores all the information about the submissions made by students to this assignment</span>
+<span class="sd">	:type s: list(users.models.studentsubmissions)</span>
+<span class="sd">	:param upload_type: This variable stores the acceptable file/folder format type(extension) of the student submission.</span>
+<span class="sd">	:type upload_type: str</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">assignmentfile</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span> <span class="o">=</span><span class="s1">&#39;uploads/&#39;</span><span class="p">)</span>
+	<span class="n">Treestructure</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span> <span class="o">=</span><span class="s1">&#39;uploads/&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+	<span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span> <span class="n">max_length</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="n">FILE_TYPES</span> <span class="o">=</span><span class="p">(</span>
+		<span class="p">(</span><span class="s1">&#39;.zip&#39;</span><span class="p">,</span><span class="s1">&#39;.zip&#39;</span><span class="p">),</span>
+		<span class="p">(</span><span class="s1">&#39;.tgz&#39;</span><span class="p">,</span><span class="s1">&#39;.tgz&#39;</span><span class="p">),</span>
+		<span class="p">(</span><span class="s1">&#39;.cpp&#39;</span><span class="p">,</span><span class="s1">&#39;.cpp&#39;</span><span class="p">),</span>
+		<span class="p">(</span><span class="s1">&#39;.py&#39;</span><span class="p">,</span><span class="s1">&#39;.py&#39;</span><span class="p">),</span>
+		<span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;.pdf&#39;</span><span class="p">),</span>
+		<span class="p">(</span><span class="s1">&#39;.sh&#39;</span><span class="p">,</span> <span class="s1">&#39;.sh&#39;</span><span class="p">)</span>
+	<span class="p">)</span>
+	<span class="n">autograder</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">upload_to</span> <span class="o">=</span><span class="s1">&#39;uploads&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+	<span class="n">deadline</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+	<span class="n">s</span> <span class="o">=</span>  <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">studentsubmissions</span><span class="p">)</span>
+	<span class="n">upload_type</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">FILE_TYPES</span><span class="p">,</span><span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;.py&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="courses"><a class="viewcode-back" href="../../users.html#users.forms.courses">[docs]</a><span class="k">class</span> <span class="nc">courses</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This model contains all the information and field of data associated with the courses which we are storing.\n</span>
+
+<span class="sd">	:param assignments: This variable stores all the assignments objects uploaded by the teacher to this course.</span>
+<span class="sd">	:type assignments: list(users.models.assignments)</span>
+<span class="sd">	:param title: This variable contains the title of the course</span>
+<span class="sd">	:type title: str</span>
+<span class="sd">	:param code: This variable contains the code related to course which is used for registration of the course</span>
+<span class="sd">	:type code: str</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">assignments</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">assignments</span><span class="p">)</span>
+	<span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span> <span class="n">max_length</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span>
+	<span class="n">code</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span></div>
+	<span class="c1"># ids = models.IntegerField(unique = True)</span>
+	<span class="c1"># ass_n = models.IntegerField(default = 1)</span>
+
+<div class="viewcode-block" id="UserProfile"><a class="viewcode-back" href="../../users.html#users.forms.UserProfile">[docs]</a><span class="k">class</span> <span class="nc">UserProfile</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This model contains all the information and fields of the data of the user we are storing.\n</span>
+
+<span class="sd">	:param user: This helps in matching our model to the pre defined User Django model.</span>
+<span class="sd">	:type user: models.User</span>
+<span class="sd">	:param user_name: This variable stores the user name of the user we are storing</span>
+<span class="sd">	:type user_name: str</span>
+<span class="sd">	:param identity: This variable stores the identity i.e. whether the user is a student or a teacher</span>
+<span class="sd">	:type identity: str</span>
+<span class="sd">	:param courses_registered: This variable stores all the courses for which this user is registered</span>
+<span class="sd">	:type courses_registered: list(users.models.courses)</span>
+<span class="sd">	:param full_name: This variable stores the full name of the user</span>
+<span class="sd">	:type full_name: str</span>
+<span class="sd">	:param roll_no: This variable stores the roll number of the user</span>
+<span class="sd">	:type roll_no: str</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">user</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">OneToOneField</span><span class="p">(</span><span class="n">User</span><span class="p">,</span><span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span><span class="n">related_name</span><span class="o">=</span><span class="s2">&quot;u&quot;</span><span class="p">)</span>
+	<span class="n">IDENTITY_CHOICE</span><span class="o">=</span><span class="p">(</span>
+		<span class="p">(</span><span class="s1">&#39;teacher&#39;</span><span class="p">,</span><span class="s1">&#39;teacher&#39;</span><span class="p">),</span> 
+		<span class="p">(</span><span class="s1">&#39;student&#39;</span><span class="p">,</span> <span class="s1">&#39;student&#39;</span><span class="p">),</span>
+		<span class="p">(</span><span class="s1">&#39;assistant&#39;</span><span class="p">,</span><span class="s1">&#39;assistant&#39;</span><span class="p">),</span>
+	<span class="p">)</span>
+	<span class="n">user_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+	<span class="n">identity</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">IDENTITY_CHOICE</span><span class="p">,</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;student&quot;</span><span class="p">)</span>
+	<span class="n">courses_registered</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">courses</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+	<span class="n">full_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span>
+	<span class="c1">#year = models.IntegerField(choices=YEAR_IN_COLLEGE_CHOICES, default=1)</span>
+	<span class="n">roll_no</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="c1">#created = models.DateField(editable=False, null=True)</span>
+
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;| This method returns the string representation of this node class.</span>
+<span class="sd">        | It is called when str or print is invoked on the object.</span>
+<span class="sd">        | In this function, it simply returns the Roll number of user</span>
+<span class="sd">        </span>
+<span class="sd">        :return: Returns the roll number of user.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">roll_no</span>
+
+<div class="viewcode-block" id="UserProfile.save"><a class="viewcode-back" href="../../users.html#users.forms.UserProfile.save">[docs]</a>	<span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;| This method overwrites the inherited save method from model.Model</span>
+<span class="sd">		| It is used to save the data </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">roll_no</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span>
+			<span class="c1">#self.created = datetime.date.today()</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">UserProfile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Arpana Prajapati, Palle Bhavana, Nikhil Verma.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

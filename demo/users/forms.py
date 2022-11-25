@@ -121,3 +121,7 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['full_name', 'roll_no', 'email', 'identity',]
+
+class register_student_for_course(forms.Form):
+    user_name = forms.CharField(max_length=100)
+    roll_no = forms.CharField(max_length=9)

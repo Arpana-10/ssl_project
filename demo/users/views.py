@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.views import View
 from django.http import HttpResponseRedirect 
 from .models import assignments, UserProfile, courses, studentsubmissions, messages
-from .forms import assignment_form, UserForm, UserProfileForm, course_form, course_reg, solution, csv_form, feedback_form
+from .forms import assignment_form, UserForm, UserProfileForm, course_form, course_reg, solution, csv_form, feedback_form, register_student_for_course
 from django.views.generic import ListView
 from django.template import RequestContext
 from django.template.loader import get_template
@@ -861,6 +861,81 @@ def delete(request):
     user.save()
     return HttpResponseRedirect("/")
 
+
+def reg_student(request,num):
+    """
+    This view is used by teachers to register new students to their course with the help of student's user name and roll number similar to how we are automatically enrolled for courses on moodle.\n
+    It works by searching if a student with these user name and roll number exist in the database.\n
+    If such student does not exist it will simply ask to refill the form.\n
+    But if such student does exist then it searches whether this student has already been enrolled to this course or not.\n
+    If no, then it just adds the student to this course.
+
+    :param request: HttpRequest object which contains the metadata about the request
+    :type request: HttpRequest
+    :return: returns the request to render the corresponding html pages
+    """
+
+    msg = ""
+    current_user = request.user
+    if current_user.id!=None:
+        if request.method == 'POST':
+            # print(6)
+            uform = register_student_for_course(request.POST)
+            if uform.is_valid() :
+                # print(7)
+                stud_name  = uform.cleaned_data["user_name"]
+                stud_roll = uform.cleaned_data["roll_no"]
+                users = UserProfile.objects.all()
+                x = False
+                for user in users:
+                    # print(8)
+                    if(user.user_name == stud_name and user.roll_no == stud_roll):
+                        # print(9)
+                        x = True
+                        break
+                if x == False:
+                    
+                    msg = "Student with this name and roll number does not exist"
+                    form = register_student_for_course()
+                    context = {"form": form,
+                        "msg":msg,}
+                    return render(request, 'users/add_to_course.html',context)
+                else:
+                    
+                    U = UserProfile.objects.get(roll_no = stud_roll)
+                    stud_courses = U.courses_registered.all()
+                    y = False
+                    # print(type(stud_courses[0]))
+                    # print(type(num))
+                    for c in  stud_courses:
+                        if c.id == num:
+                            y = True
+                            break
+                    if y == True:
+                        # print(12)
+                        msg = "Student already enrolled for the course"
+                        form = register_student_for_course()
+                        context = {"form": form,
+                        "msg":msg,}
+                        return render(request, 'users/add_to_course.html',context)
+                    else:
+                        # print(13)
+                        U.courses_registered.add(num)
+                        U.save()
+                        msg = "Student successfully registered"
+                        form = register_student_for_course()
+                        context = {"form": form,
+                        "msg":msg,}
+                        return redirect(f"http://127.0.0.1:8000/{num}/")
+            
+    # print(14)
+        form = register_student_for_course()
+        context = {"form": form,
+                    "msg":msg,}
+        return render(request, 'users/add_to_course.html',context)
+
+    else:
+        return redirect("http://127.0.0.1:8000/login")
 
 
 

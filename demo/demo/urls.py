@@ -32,7 +32,7 @@ urlpatterns = [
     path('reg/', user_views.register_user, name = 'reg'),
     path('createcourse/',user_views.createcourse),
     path('delete/', user_views.delete),
-    
+    path('addstudent/<int:num>/',user_views.reg_student),
     
 ]
 urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

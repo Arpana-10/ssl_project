@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>users.views &mdash; Portal for Courses  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Portal for Courses
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">demo</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Portal for Courses</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>users.views</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for users.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">login</span><span class="p">,</span> <span class="n">authenticate</span>
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">messages</span> <span class="k">as</span> <span class="n">m</span>
+<span class="kn">from</span> <span class="nn">.forms</span> <span class="kn">import</span>  <span class="n">passwordchange</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.views</span> <span class="kn">import</span> <span class="n">View</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span> 
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">UserProfile</span><span class="p">,</span> <span class="n">courses</span><span class="p">,</span> <span class="n">studentsubmissions</span><span class="p">,</span> <span class="n">messages</span>
+<span class="kn">from</span> <span class="nn">.forms</span> <span class="kn">import</span> <span class="n">assignment_form</span><span class="p">,</span> <span class="n">UserForm</span><span class="p">,</span> <span class="n">UserProfileForm</span><span class="p">,</span> <span class="n">course_form</span><span class="p">,</span> <span class="n">course_reg</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">csv_form</span><span class="p">,</span> <span class="n">feedback_form</span><span class="p">,</span> <span class="n">register_student_for_course</span>
+<span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">ListView</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">RequestContext</span>
+<span class="kn">from</span> <span class="nn">django.template.loader</span> <span class="kn">import</span> <span class="n">get_template</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">zipfile</span> <span class="kn">import</span> <span class="n">ZipFile</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="kn">import</span> <span class="n">EmailMessage</span><span class="p">,</span> <span class="n">send_mail</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">logout</span>
+<span class="kn">import</span> <span class="nn">smtplib</span>
+
+<div class="viewcode-block" id="time"><a class="viewcode-back" href="../../users.html#users.views.time">[docs]</a><span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    function which returns deadline of the assignment, which is used to sort the assignments based on their deadline.\n</span>
+<span class="sd">    :param u: assignment for which we want deadline</span>
+<span class="sd">    :type u: model.assignment</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">u</span><span class="o">.</span><span class="n">deadline</span></div>
+
+<div class="viewcode-block" id="home"><a class="viewcode-back" href="../../users.html#users.views.home">[docs]</a><span class="k">def</span> <span class="nf">home</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used for rendering the home page of users.\n</span>
+<span class="sd">    It checks whether the user is logged in or not and also if the user who is logged in is a teacher or a student and renders the</span>
+<span class="sd">    corresponding home pages.\n</span>
+<span class="sd">    If the user is logged out then it simply redirectsthe user to login page.\n</span>
+<span class="sd">    If the user was a student, it also returns an extra argument context which contains the assignments of the student. The context is used to send the variable names to the templates to display the assignments of the student.</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;student&#39;</span><span class="p">:</span>
+           
+                <span class="n">assignment</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">courses_reg</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="n">courses_reg</span><span class="p">:</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">course</span><span class="p">]</span>
+                    <span class="n">app</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">assign</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">ass</span> <span class="ow">in</span> <span class="n">assign</span><span class="p">:</span>
+                        <span class="n">sols</span> <span class="o">=</span> <span class="n">ass</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                        <span class="n">d</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sols</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">username</span> <span class="o">==</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">:</span>
+                                <span class="n">d</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>   
+                            <span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ass</span><span class="p">)</span>
+                            <span class="n">app</span> <span class="o">=</span> <span class="kc">True</span>
+                
+                    <span class="k">if</span> <span class="n">app</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="c1"># assignment.append(course)</span>
+                        <span class="n">l2</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+                        <span class="n">l2</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="n">time</span><span class="p">)</span>
+                        <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">+</span><span class="n">l2</span>
+                        <span class="n">assignment</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                <span class="n">messages</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="n">msgs</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+                    <span class="n">msgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+                <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;ass&#39;</span> <span class="p">:</span> <span class="n">assignment</span><span class="p">,</span>
+                    <span class="s1">&#39;msgs&#39;</span><span class="p">:</span><span class="n">msgs</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/st_profile.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+            <span class="k">elif</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;teacher&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/teach_profile.html&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+
+            <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/st_profile.html&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+    <span class="c1">#return render(request, &#39;users/home.html&#39;)</span>
+
+
+<div class="viewcode-block" id="update"><a class="viewcode-back" href="../../users.html#users.views.update">[docs]</a><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to update the password of user&#39;s account.\n</span>
+<span class="sd">    It takes the user to a new page to fill out a password change form and updates the password of the user.\n</span>
+<span class="sd">    It then redirects the user to the login page for logging in again.</span>
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">passwordchange</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+
+    <span class="c1">#   entered_username = request.POST[&#39;username&#39;]</span>
+    <span class="c1">#   print(entered_username)</span>
+            <span class="c1">#form.save()</span>
+                <span class="n">initial_password</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;password_initial&#39;</span><span class="p">]</span>
+                <span class="n">final_password</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;password_final&#39;</span><span class="p">]</span>
+                <span class="n">u</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">check_password</span><span class="p">(</span><span class="n">initial_password</span><span class="p">):</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Password is successfully changed&quot;</span>
+                    <span class="n">u</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">final_password</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">u</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> 
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">m</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;Check the password again&quot;</span><span class="p">)</span>
+
+                
+        <span class="n">form</span> <span class="o">=</span> <span class="n">passwordchange</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/updateprofile.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s2">&quot;form&quot;</span><span class="p">:</span><span class="n">form</span>
+    <span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="createassignment"><a class="viewcode-back" href="../../users.html#users.views.createassignment">[docs]</a><span class="k">def</span> <span class="nf">createassignment</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span> 
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view allows only a teacher to create an assignment in a course to be visible to every student enrolled in that course.\n</span>
+<span class="sd">    It saves the data in the database taken in from the assignment form declared in forms.py.\n</span>
+<span class="sd">    Unauthorized users and students are not able to create an assignment and they simply get redirected to login page and home page respectively</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :param num: id of the course</span>
+<span class="sd">    :type num: int</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;teacher&#39;</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+             <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">assignment_form</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span>
+             <span class="k">if</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;here&quot;</span><span class="p">)</span>
+                <span class="n">doc</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span>
+                <span class="n">doc_name</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;assignmentfile&quot;</span><span class="p">]</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num</span><span class="p">)</span>
+                <span class="n">tree</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;Treestructure&#39;</span><span class="p">]</span>
+                <span class="n">au</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;autograder&#39;</span><span class="p">]</span>
+                <span class="n">up</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;upload_type&#39;</span><span class="p">]</span>
+                <span class="n">dd</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;deadline&quot;</span><span class="p">]</span>
+                <span class="n">tl</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span>
+                <span class="n">course_added</span> <span class="o">=</span> <span class="n">assignments</span><span class="p">(</span><span class="n">assignmentfile</span> <span class="o">=</span> <span class="n">doc_name</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="n">tl</span><span class="p">,</span>  <span class="n">deadline</span> <span class="o">=</span> <span class="n">dd</span><span class="p">,</span> <span class="n">upload_type</span> <span class="o">=</span> <span class="n">up</span><span class="p">,</span> <span class="n">Treestructure</span> <span class="o">=</span>  <span class="n">tree</span><span class="p">,</span> <span class="n">autograder</span> <span class="o">=</span> <span class="n">au</span> <span class="p">)</span>
+                <span class="n">course_added</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">course_added</span><span class="p">)</span>
+                <span class="c1"># x.ass_n = n+1</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">course_added</span><span class="o">.</span><span class="n">deadline</span><span class="p">,</span> <span class="s2">&quot;-----&quot;</span><span class="p">)</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;msg&quot;</span><span class="p">:</span> <span class="s2">&quot;Assignment is successfully created&quot;</span>
+                <span class="p">}</span>
+                <span class="c1">#print( current_user.usercurrent_user = request.username)</span>
+                <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;users/assign.html&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;users/st_profile.html&quot;</span> <span class="p">)</span>
+
+        <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">assignment_form</span><span class="p">()</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">submitted_form</span><span class="p">,</span>
+		<span class="p">}</span>
+        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/assign.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+        
+
+
+<div class="viewcode-block" id="createcourse"><a class="viewcode-back" href="../../users.html#users.views.createcourse">[docs]</a><span class="k">def</span> <span class="nf">createcourse</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view allows a teacher to create a course to which students can register and for student to register for a course created by a teacher.\n</span>
+<span class="sd">    1)If the user is a teacher, then a course code is generated by using the time and date of creation thus causing it to be always unique and a course with a title taken from the form is generated with this code.\n</span>
+<span class="sd">    This code is used by students to register for this course.\n</span>
+<span class="sd">    2)If the user is a student, then it takes the course code from the course_reg form and enrolls that particular student to that course if a course with that particular code exists and also adds the course to students course lists.\n</span>
+<span class="sd">    Otherwise, it simply prompts them to refill the form.\n</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span> <span class="o">==</span> <span class="s2">&quot;teacher&quot;</span><span class="p">:</span>
+        <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">course_form</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">course_reg</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">ErrMsg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">SuccMsg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span> <span class="o">==</span> <span class="s2">&quot;teacher&quot;</span><span class="p">:</span>
+                
+                <span class="n">code</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">%H%M%S&quot;</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">())</span>
+                <span class="n">course_added</span> <span class="o">=</span> <span class="n">courses</span><span class="p">(</span><span class="n">title</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">],</span> <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="p">)</span>
+                <span class="n">course_added</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+                <span class="c1">#print( current_user.usercurrent_user = request.username)</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user_name</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">course_added</span><span class="p">)</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">SuccMsg</span> <span class="o">=</span> <span class="s2">&quot;Course successfully created&quot;</span>
+                <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">course_form</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">submitted_form</span><span class="p">,</span>
+                    <span class="s2">&quot;msg&quot;</span> <span class="p">:</span> <span class="n">SuccMsg</span><span class="p">,</span>
+                    <span class="s1">&#39;code&#39;</span> <span class="p">:</span> <span class="n">code</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;users/courses.html&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+                <span class="c1"># ErrMsg = &quot;Course Already exists&quot;</span>
+
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span> <span class="o">==</span> <span class="s2">&quot;student&quot;</span> <span class="p">:</span>
+                <span class="n">courseExists</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">courseExists</span><span class="p">:</span>
+                    <span class="n">course</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">])</span>
+                    <span class="n">c</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">course</span><span class="p">)</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">SuccMsg</span> <span class="o">=</span> <span class="s2">&quot;Successfully registered for the course&quot;</span>
+                    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;msg&quot;</span> <span class="p">:</span> <span class="n">SuccMsg</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;users/courses.html&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ErrMsg</span> <span class="o">=</span> <span class="s2">&quot;Course does not exist&quot;</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;wrong code&quot;</span><span class="p">)</span>        
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">submitted_form</span><span class="p">,</span>
+            <span class="s2">&quot;msg&quot;</span> <span class="p">:</span> <span class="n">ErrMsg</span><span class="p">,</span>
+		<span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/courses.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>  
+ <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+
+
+<div class="viewcode-block" id="assignment_views"><a class="viewcode-back" href="../../users.html#users.views.assignment_views">[docs]</a><span class="k">def</span> <span class="nf">assignment_views</span><span class="p">(</span> <span class="n">request</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"> This view allows the user to view all the assignments of the course he has been enrolled to by sending the context and rendering it on the html page.\n</span>
+<span class="sd"> It searchs for the course which have id = num and view all the assignments in that course.</span>
+
+<span class="sd"> :param num: id of the course we are searching the assignments for</span>
+<span class="sd"> :type num: int</span>
+<span class="sd"> :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd"> :type request: HttpRequest</span>
+<span class="sd"> :return: returns the request to render the corresponding html pages</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ 
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">:</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="n">assignments</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">assignments</span><span class="p">[</span><span class="s2">&quot;assignment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+        <span class="n">assignments</span><span class="p">[</span><span class="s2">&quot;ass&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span> <span class="o">==</span> <span class="s2">&quot;teacher&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/all_assign_std.html&#39;</span><span class="p">,</span> <span class="n">assignments</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/all_assign_std.html&#39;</span><span class="p">,</span> <span class="n">assignments</span> <span class="p">)</span>
+ <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+    
+
+<div class="viewcode-block" id="allcourses_views"><a class="viewcode-back" href="../../users.html#users.views.allcourses_views">[docs]</a><span class="k">def</span> <span class="nf">allcourses_views</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"> This view allows the user to view all the courses he has been enrolled to.\n</span>
+<span class="sd"> It takes the current user from the request and get all the course he has been enrolled to from UserProfile model and renders it in the html page by sending it as a context.</span>
+<span class="sd"> If the user is not authorized, it simply redirects the user to the login page.</span>
+<span class="sd"> :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd"> :type request: HttpRequest</span>
+<span class="sd"> :return: returns the request to render the corresponding html pages</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="nb">print</span><span class="p">(</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span><span class="p">)</span>
+    <span class="n">courses</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">course</span> <span class="ow">in</span> <span class="p">(</span><span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user_name</span><span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">course</span><span class="p">)</span> 
+    <span class="n">courses</span><span class="p">[</span><span class="s1">&#39;courses_added&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/all_courses.html&#39;</span><span class="p">,</span> <span class="n">courses</span><span class="p">)</span>
+ <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+   
+
+
+<div class="viewcode-block" id="register_user"><a class="viewcode-back" href="../../users.html#users.views.register_user">[docs]</a><span class="k">def</span> <span class="nf">register_user</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to register a user by taking in data from the registration form.\n</span>
+<span class="sd">    If the data filled in the form is valid, it adds the user with these details to the database and redirects to login page.\n</span>
+<span class="sd">    Otherwise if the data filled in the form is invalid, it simply prompts the user to refill the registration form.</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user_form</span> <span class="o">=</span> <span class="n">UserForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1">#print(3)</span>
+    <span class="n">profile_form</span> <span class="o">=</span> <span class="n">UserProfileForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">registered</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">user_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">profile_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">user_form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">user_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span>
+            <span class="n">password</span> <span class="o">=</span> <span class="n">user_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span>
+            <span class="n">email</span> <span class="o">=</span> <span class="n">profile_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;email&#39;</span><span class="p">]</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">profile</span> <span class="o">=</span> <span class="n">profile_form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">user_name</span> <span class="o">=</span> <span class="n">username</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">registered</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">is_active</span><span class="p">:</span>
+						<span class="c1"># login(request, user)</span>
+                    <span class="n">m</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;Successfully Registered&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                      
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s2">&quot;pform&quot;</span><span class="p">:</span> <span class="n">profile_form</span><span class="p">,</span>
+			<span class="s2">&quot;uform&quot;</span><span class="p">:</span> <span class="n">user_form</span><span class="p">,</span>
+		<span class="p">}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/reg.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+<span class="c1"># newly added code.</span>
+
+<div class="viewcode-block" id="course_page"><a class="viewcode-back" href="../../users.html#users.views.course_page">[docs]</a><span class="k">def</span> <span class="nf">course_page</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"> This view is used to view all the users registered for that course so that they can be displayed on course page when opened by a teacher.\n</span>
+<span class="sd"> It gets the course which we are currently enquiring from the &#39;num&#39; variable and maintains a list of the students enrolled in that course by searching for the courses students are enrolled in by going through all the students.\n</span>
+<span class="sd"> It adds the list of students as a context to render request so that it can be displayed on the html page.\n</span>
+<span class="sd"> If the user is not authorized it simply redirects it to login page.</span>
+
+<span class="sd"> :param num: id of the course we are searching the users for</span>
+<span class="sd"> :type num: int</span>
+<span class="sd"> :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd"> :type request: HttpRequest</span>
+<span class="sd"> :return: returns the request to render the corresponding html pages</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">identity</span> <span class="o">==</span> <span class="s2">&quot;teacher&quot;</span><span class="p">:</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">l2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">identity</span> <span class="o">==</span> <span class="s2">&quot;student&quot;</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">course</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">course</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">course</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">num</span><span class="p">:</span>
+                    <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+                    <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">l2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;num&quot;</span><span class="p">:</span><span class="n">num</span><span class="p">,</span>
+        <span class="s2">&quot;users&quot;</span> <span class="p">:</span> <span class="n">l</span><span class="p">,</span>
+        <span class="s2">&quot;students&quot;</span><span class="p">:</span><span class="n">l2</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/course_page_teach.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/st_profile.html&#39;</span><span class="p">)</span>
+ <span class="k">else</span><span class="p">:</span>
+    
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+        
+<div class="viewcode-block" id="solution_upload"><a class="viewcode-back" href="../../users.html#users.views.solution_upload">[docs]</a><span class="k">def</span> <span class="nf">solution_upload</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to upload the solution for each assignment only if the submitted file format match the upload_type specified by the teacher.\n</span>
+<span class="sd">    As soon as a submission is made, the file format is checked, if its not as specified the users gets a message.\n</span>
+<span class="sd">    Else if the file type is &quot;.zip&quot; or &quot;.tgz&quot; it runs a subproces to match the tree structure of the uploaded file with the one provided by the teacher for that particular assignment.</span>
+<span class="sd">    It then updates the feedback and status of the student&#39;s submission.</span>
+<span class="sd">    If the specified file type is &quot;.sh&quot; it spawns a subprocess to evaluate the submission and the marks, status and feedback gets updated automatically for each submission.\n</span>
+<span class="sd">    It requires the user with identity as student only to make a submission.</span>
+<span class="sd">    It redirects the unauthorized users to the login page.</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :param num1: id of the course</span>
+<span class="sd">    :type num1: int</span>
+<span class="sd">    :param num2: id of the assignment</span>
+<span class="sd">    :type num2: int</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">msg2</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">msg3</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        
+        <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">solution</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span>
+            <span class="n">doc_name</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;assignment&quot;</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">upload_type</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">Treestructure</span>
+            <span class="c1">#print(doc_name)</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">doc_name</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+                <span class="c1"># messages.error(request,&#39;Please upload a&#39; + str(z) + &#39;file&#39;)</span>
+                <span class="n">msg</span><span class="o">=</span> <span class="s1">&#39;Please upload a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; file&#39;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;----------&quot;</span><span class="p">)</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">studentsubmissions</span><span class="p">(</span><span class="n">solution</span> <span class="o">=</span> <span class="n">doc_name</span><span class="p">,</span> <span class="n">username</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">file_name</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="p">)</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">deadline</span> <span class="o">&lt;</span> <span class="n">s</span><span class="o">.</span><span class="n">created_at</span><span class="p">:</span>
+                    <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;late submission&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;successfully submitted&quot;</span><span class="p">)</span>
+                <span class="c1"># 20221121111714 check</span>
+                <span class="c1"># 20221121113337 try1</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">!=</span><span class="s2">&quot;.cpp&quot;</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">!=</span><span class="s2">&quot;.py&quot;</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">!=</span><span class="s2">&quot;.sh&quot;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">zipf</span> <span class="o">=</span> <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">solution</span>
+                        <span class="n">autograder</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">autograder</span>
+                        <span class="n">tree</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">Treestructure</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span><span class="s2">&quot;.zip&quot;</span><span class="p">:</span>
+                            <span class="n">command1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;unzip media/</span><span class="si">{</span><span class="n">zipf</span><span class="si">}</span><span class="s2"> -d ./submissions/&quot;</span>
+                        <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span><span class="s2">&quot;.tgz&quot;</span><span class="p">:</span>
+                            <span class="n">command1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tar -xvzf media/</span><span class="si">{</span><span class="n">zipf</span><span class="si">}</span><span class="s2"> -C ./submissions/&quot;</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="n">doc_name</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+                        <span class="c1"># print(name, command1)</span>
+                        <span class="n">p1</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command1</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">command2</span> <span class="o">=</span> <span class="s2">&quot;cd submissions/;ls&quot;</span>
+                        <span class="n">p2</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command2</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">dirname</span> <span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span> <span class="n">dirname</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)</span>
+                        <span class="n">command3</span> <span class="o">=</span> <span class="s2">&quot;cd submissions/; tree -a &quot;</span><span class="o">+</span><span class="n">dirname</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">command3</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
+                        <span class="n">p3</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command3</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">m</span> <span class="o">=</span> <span class="n">p3</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;t.txt&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="n">command4</span> <span class="o">=</span> <span class="s2">&quot;diff t.txt media/&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+                        <span class="n">p3</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command4</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">output</span> <span class="o">=</span> <span class="n">p3</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">output</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;tree structure not matching , check again&quot;</span>
+                            <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">marks</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+                            <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">feedback</span> <span class="o">=</span> <span class="n">msg</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;tree structure matched&quot;</span>
+                            <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">marks</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
+                            <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">feedback</span> <span class="o">=</span> <span class="n">msg</span><span class="p">)</span>
+                        
+                        <span class="n">finalcommand</span> <span class="o">=</span> <span class="s2">&quot;rm -r submissions&quot;</span>
+                        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">finalcommand</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">marks</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">feedback</span> <span class="o">=</span> <span class="s2">&quot;wrong submission&quot;</span><span class="p">)</span>
+                        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;rm -r submissions&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   
+                <span class="c1"># unzip autograder</span>
+                <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">==</span><span class="s2">&quot;.sh&quot;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">autog</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">autograder</span>  
+                        <span class="n">st_soln</span> <span class="o">=</span> <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">solution</span>            
+                        <span class="n">command1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;unzip media/</span><span class="si">{</span><span class="n">autog</span><span class="si">}</span><span class="s2"> -d auto_grader&quot;</span>
+                        <span class="n">p1</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command1</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">autog</span><span class="p">)</span>
+                        <span class="n">command2</span> <span class="o">=</span> <span class="s2">&quot;cd auto_grader/; ls&quot;</span>
+                        <span class="n">p2</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command2</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">print1</span> <span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="n">print1</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;-----&quot;</span><span class="p">)</span>
+                        <span class="c1"># command3 = &quot;ls&quot;</span>
+                        <span class="n">command3</span> <span class="o">=</span> <span class="s2">&quot;cp .&quot;</span><span class="o">+</span> <span class="n">st_soln</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="s2">&quot; ./auto_grader/&quot;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;/decode.sh&quot;</span>
+                        <span class="n">command4</span> <span class="o">=</span> <span class="s2">&quot;cd auto_grader/&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;/;chmod +x auto_eval_*.sh; ./auto_eval_*.sh decode.sh;&quot;</span> 
+                        <span class="n">p3</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command3</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">command3</span><span class="p">,</span> <span class="n">command4</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> 
+                        <span class="n">p3</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command4</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="c1"># p2 = subprocess.run(command2, capture_output=True, shell=True)</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="n">p3</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+                        <span class="n">lines</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+                        <span class="n">st_marks</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="p">][</span><span class="mi">14</span><span class="p">:])</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">st_marks</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">st_marks</span><span class="p">))</span>
+                        <span class="n">st_status</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="n">st_feedback</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">marks</span> <span class="o">=</span> <span class="n">st_marks</span><span class="p">)</span>
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span> <span class="o">=</span> <span class="n">st_status</span><span class="p">)</span>
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">feedback</span> <span class="o">=</span> <span class="n">st_feedback</span><span class="p">)</span>
+
+                        <span class="n">finalcommand</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;cd auto_grader/;rm -r </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">finalcommand</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">marks</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+                        <span class="n">studentsubmissions</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">feedback</span> <span class="o">=</span> <span class="s2">&quot;code failed&quot;</span><span class="p">)</span> 
+                        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;rm -r auto_grader/&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>          
+                    
+
+    <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">username</span> <span class="o">=</span> <span class="n">current_user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                
+    <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">solution</span><span class="p">()</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">submitted_form</span><span class="p">,</span> 
+            <span class="s2">&quot;sol&quot;</span><span class="p">:</span> <span class="n">l</span><span class="p">,</span>
+            <span class="s2">&quot;ass_file&quot;</span><span class="p">:</span><span class="n">z</span><span class="p">,</span>
+            <span class="s1">&#39;msg&#39;</span><span class="p">:</span><span class="n">msg</span><span class="p">,</span>
+            <span class="s2">&quot;msg2&quot;</span><span class="p">:</span><span class="n">msg2</span><span class="p">,</span>
+            <span class="s2">&quot;msg3&quot;</span><span class="p">:</span> <span class="n">msg3</span>
+		<span class="p">}</span> 
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/sol.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+ <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="all_submissions"><a class="viewcode-back" href="../../users.html#users.views.all_submissions">[docs]</a><span class="k">def</span> <span class="nf">all_submissions</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"> This view shows the teacher all the latest submissions made to the particular assignment by every student.\n</span>
+<span class="sd"> It searches for all the submissions made to that assignment and maintains a dictionary of the users and their corresponding latest submissions by checking for the upload time</span>
+<span class="sd"> and date of the solution and sends this list by passing it as a context to render request so that the uploaded file, marks and other details can be displayed on the html page.\n</span>
+<span class="sd"> It is also able to take in data from feedback form (defined in forms.py) so that the teacher has the ability to individually update the marks of every assignment.\n</span>
+<span class="sd"> This view also allows the teacher to download all the submission made by students in a single zip folder.\n</span>
+<span class="sd"> If the user is a student it simply redirects it to his home page.</span>
+
+<span class="sd"> :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd"> :type request: HttpRequest</span>
+<span class="sd"> :param num1: id of the course to which the assignment belongs</span>
+<span class="sd"> :type num1: int</span>
+<span class="sd"> :param num2: id of the assignment which we are interested in</span>
+<span class="sd"> :type num2: int</span>
+<span class="sd"> :return: returns the request to render the corresponding html pages</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+  
+    <span class="n">x</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span>  <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">username</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">created_at</span> <span class="o">&gt;</span> <span class="n">d</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">username</span><span class="p">]</span><span class="o">.</span><span class="n">created_at</span> <span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">username</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">username</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">created_at</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">created_at</span> <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;form_id&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;feed&#39;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">feedback_form</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+                <span class="n">u</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">)</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">username</span> <span class="o">=</span> <span class="n">u</span><span class="p">)</span>
+                <span class="nb">max</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">created_at</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="o">.</span><span class="n">created_at</span><span class="p">:</span>
+                        <span class="nb">max</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">feedback_user</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;feedback&quot;</span><span class="p">]</span>
+                <span class="n">marks_user</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;marks&quot;</span><span class="p">]</span>
+                <span class="nb">max</span><span class="o">.</span><span class="n">feedback</span> <span class="o">=</span> <span class="n">feedback_user</span>
+                <span class="nb">max</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="nb">max</span><span class="o">.</span><span class="n">marks</span> <span class="o">=</span> <span class="n">marks_user</span>
+                <span class="nb">max</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">empty_form</span> <span class="o">=</span> <span class="n">feedback_form</span><span class="p">()</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span>
+                <span class="n">Y</span> <span class="o">=</span>  <span class="n">X</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">D</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">S</span> <span class="ow">in</span> <span class="n">Y</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">S</span><span class="o">.</span><span class="n">username</span> <span class="ow">in</span> <span class="n">D</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">S</span><span class="o">.</span><span class="n">created_at</span> <span class="o">&gt;</span> <span class="n">D</span><span class="p">[</span><span class="n">S</span><span class="o">.</span><span class="n">username</span><span class="p">]</span><span class="o">.</span><span class="n">created_at</span> <span class="p">:</span>
+                            <span class="n">D</span><span class="p">[</span><span class="n">S</span><span class="o">.</span><span class="n">username</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">D</span><span class="p">[</span><span class="n">S</span><span class="o">.</span><span class="n">username</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">D</span><span class="p">:</span>
+                    <span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">context</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;sol&quot;</span><span class="p">:</span> <span class="n">L</span><span class="p">,</span>
+                    <span class="s2">&quot;num1&quot;</span><span class="p">:</span> <span class="n">num1</span><span class="p">,</span>
+                    <span class="s2">&quot;num2&quot;</span><span class="p">:</span><span class="n">num2</span><span class="p">,</span>
+                    <span class="s2">&quot;form&quot;</span><span class="p">:</span><span class="n">empty_form</span><span class="p">,</span>
+                    <span class="s2">&quot;assign&quot;</span><span class="p">:</span><span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">),</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/submissions.html&#39;</span><span class="p">,</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;form_id&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;download&#39;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+                <span class="n">filenames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">zip_subdir</span> <span class="o">=</span> <span class="s2">&quot;submissions&quot;</span>
+            <span class="n">zip_filename</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.zip&quot;</span> <span class="o">%</span> <span class="n">zip_subdir</span>
+
+            <span class="n">s</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">()</span>
+            <span class="n">zf</span> <span class="o">=</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">fpath</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+                <span class="n">fdir</span><span class="p">,</span> <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+                <span class="n">zip_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">zip_subdir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+                <span class="n">fpath</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">fpath</span>
+                <span class="n">zf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">zip_path</span><span class="p">)</span>
+            <span class="n">zf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">getvalue</span><span class="p">(),</span> <span class="n">content_type</span> <span class="o">=</span> <span class="s2">&quot;application/x-zip-compressed&quot;</span><span class="p">)</span>
+            <span class="n">resp</span><span class="p">[</span><span class="s1">&#39;Content-Disposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;attachment; filename=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">zip_filename</span>
+            <span class="k">return</span> <span class="n">resp</span>
+
+    <span class="n">form</span> <span class="o">=</span> <span class="n">feedback_form</span><span class="p">()</span>
+    <span class="n">context</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;sol&quot;</span><span class="p">:</span> <span class="n">l</span><span class="p">,</span>
+        <span class="s2">&quot;num1&quot;</span><span class="p">:</span> <span class="n">num1</span><span class="p">,</span>
+        <span class="s2">&quot;num2&quot;</span><span class="p">:</span><span class="n">num2</span><span class="p">,</span>
+        <span class="s2">&quot;assign&quot;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">),</span>
+        <span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">form</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/submissions.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+ <span class="k">else</span><span class="p">:</span>
+    
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="export_to_csv"><a class="viewcode-back" href="../../users.html#users.views.export_to_csv">[docs]</a><span class="k">def</span> <span class="nf">export_to_csv</span><span class="p">(</span><span class="n">reuest</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to get all the marks and feedback of each student in a CSV file in a specific format.\n</span>
+<span class="sd">    It writes the students detail, name of file it uploaded, current marks and current feedback in the CSV file, for each submission made till the time.\n</span>
+<span class="sd">    It then downloads that CSV file.\n</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :param num1: id of the course</span>
+<span class="sd">    :type num1: int</span>
+<span class="sd">    :param num2: id of the assignment</span>
+<span class="sd">    :type num2: int</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">reuest</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">profiles</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;text/csv&#39;</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">[</span><span class="s1">&#39;Content-Disposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;attachment; filename=profile_export.csv&#39;</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="s1">&#39;solution&#39;</span><span class="p">,</span> <span class="s1">&#39;feedback&#39;</span><span class="p">,</span> <span class="s1">&#39;marks&#39;</span><span class="p">])</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">profile_fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">profiles</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">username</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">created_at</span> <span class="o">&gt;</span> <span class="n">d</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">username</span><span class="p">]</span><span class="o">.</span><span class="n">created_at</span> <span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">username</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">username</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">profile_fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">username</span> <span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">solution</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">feedback</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">marks</span> <span class="p">))</span>
+    <span class="c1"># profile_fields = profiles.values_list(&#39;username&#39;, &#39;solution&#39;, &#39;feedback&#39;, &#39;marks&#39; )</span>
+    <span class="k">for</span> <span class="n">profile</span> <span class="ow">in</span> <span class="n">profile_fields</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span>
+ <span class="k">else</span><span class="p">:</span>
+    
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="marks"><a class="viewcode-back" href="../../users.html#users.views.marks">[docs]</a><span class="k">def</span> <span class="nf">marks</span><span class="p">(</span> <span class="n">request</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to update marks and feedback of all students through a csv file.\n</span>
+<span class="sd">    It first requires the user with identity as teacher to upload a csv file with a specific format.\n</span>
+<span class="sd">    It then reads the file and updates the marks and feedback for the latest solutions uploaded by the students till the time.\n</span>
+<span class="sd">    It redirects the unauthorized users to the login page</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :param num1: id of the course</span>
+<span class="sd">    :type num1: int</span>
+<span class="sd">    :param num2: id of the assignment</span>
+<span class="sd">    :type num2: int</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+ 
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">csv_form</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">csv_file</span> <span class="o">=</span> <span class="n">submitted_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;csv_file&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">csv_file</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span>  <span class="s1">&#39;File is not CSV type&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+             <span class="k">try</span><span class="p">:</span>
+                <span class="n">file_data</span> <span class="o">=</span> <span class="n">csv_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">file_data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                    <span class="n">fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span><span class="o">.</span><span class="n">assignments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">solution</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">x</span><span class="o">.</span><span class="n">feedback</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="n">x</span><span class="o">.</span><span class="n">marks</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                        <span class="n">x</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Marks and feedback are successfully added&quot;</span>
+             <span class="k">except</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Check the coloumns and rows properly, download the csv file of the submissions and then update marks and feedback in that and upload.&quot;</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+
+                <span class="s2">&quot;msg&quot;</span><span class="p">:</span> <span class="n">msg</span>
+
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/marks.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+                                    
+    <span class="n">submitted_form</span> <span class="o">=</span> <span class="n">csv_form</span><span class="p">()</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">submitted_form</span><span class="p">,</span>
+		<span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/marks.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+ <span class="k">else</span><span class="p">:</span>
+    
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+
+<div class="viewcode-block" id="deregister_view"><a class="viewcode-back" href="../../users.html#users.views.deregister_view">[docs]</a><span class="k">def</span> <span class="nf">deregister_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">uid</span><span class="p">):</span>
+ <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to deregister students enrolled in a course by the teacher of that course.\n</span>
+<span class="sd">    It simply removes the link of a selected student with the specific course for which that view is called.\n</span>
+<span class="sd">    It then renders the home page of teacher.</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :param num: id of the course</span>
+<span class="sd">    :type num: int</span>
+<span class="sd">    :param uid: id of the user getting deregistered</span>
+<span class="sd">    :type uid: int</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+ <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">uid</span><span class="p">)</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num</span><span class="p">)</span>
+    <span class="n">courses_reg</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Successfully Deregistered </span><span class="si">{</span><span class="n">users</span><span class="o">.</span><span class="n">user_name</span><span class="si">}</span><span class="s1"> from this course.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span> 
+ <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="logout_view"><a class="viewcode-back" href="../../users.html#users.views.logout_view">[docs]</a><span class="k">def</span> <span class="nf">logout_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to logout the user from the portal.\n</span>
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logout</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/login/&quot;</span><span class="p">)</span>  </div>
+<div class="viewcode-block" id="sendmsg"><a class="viewcode-back" href="../../users.html#users.views.sendmsg">[docs]</a><span class="k">def</span> <span class="nf">sendmsg</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view send message from teacher to the student with id = num2, which contains the code to register for the course with id = num1.\n</span>
+<span class="sd">    :param num1: id of the course </span>
+<span class="sd">    :type num1: int</span>
+<span class="sd">    :param num2: id of the student </span>
+<span class="sd">    :type num1: int</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num2</span><span class="p">)</span>
+    <span class="n">course</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">code</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">title</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">prof</span>
+    <span class="n">msg2</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Register for the Course </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2"> using code </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">newmsg</span> <span class="o">=</span> <span class="n">messages</span><span class="p">(</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg2</span><span class="p">,</span> <span class="n">prof</span> <span class="o">=</span> <span class="n">p</span> <span class="p">)</span>
+    <span class="n">newmsg</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">users</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newmsg</span><span class="p">)</span>
+    <span class="n">users</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Message is successfully sent to </span><span class="si">{</span><span class="n">users</span><span class="o">.</span><span class="n">user_name</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">num1</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="sendmsgall"><a class="viewcode-back" href="../../users.html#users.views.sendmsgall">[docs]</a><span class="k">def</span> <span class="nf">sendmsgall</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">num1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view send message from teacher to all the unregistered students, which contains the code to register for the course with id = num1.\n</span>
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :param num1: id of the course </span>
+<span class="sd">    :type num1: int</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">course</span> <span class="o">=</span> <span class="n">courses</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span> <span class="o">=</span> <span class="n">num1</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">code</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">title</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">course</span><span class="o">.</span><span class="n">prof</span>
+    <span class="n">msg2</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Register for the Course </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2"> using code </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">identity</span> <span class="o">==</span> <span class="s2">&quot;student&quot;</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">course</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">course</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">course</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">num1</span><span class="p">:</span>
+                    <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">newmsg</span> <span class="o">=</span> <span class="n">messages</span><span class="p">(</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg2</span><span class="p">,</span> <span class="n">prof</span> <span class="o">=</span> <span class="n">p</span> <span class="p">)</span>
+                <span class="n">newmsg</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">user</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newmsg</span><span class="p">)</span>
+                <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Message is successfully sent to all unregistered students.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">num1</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span></div>
+ 
+<div class="viewcode-block" id="delete"><a class="viewcode-back" href="../../users.html#users.views.delete">[docs]</a><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used to clean all the messages user recieved till now.\n</span>
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="reg_student"><a class="viewcode-back" href="../../users.html#users.views.reg_student">[docs]</a><span class="k">def</span> <span class="nf">reg_student</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="n">num</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view is used by teachers to register new students to their course with the help of student&#39;s user name and roll number similar to how we are automatically enrolled for courses on moodle.\n</span>
+<span class="sd">    It works by searching if a student with these user name and roll number exist in the database.\n</span>
+<span class="sd">    If such student does not exist it will simply ask to refill the form.\n</span>
+<span class="sd">    But if such student does exist then it searches whether this student has already been enrolled to this course or not.\n</span>
+<span class="sd">    If no, then it just adds the student to this course.</span>
+
+<span class="sd">    :param request: HttpRequest object which contains the metadata about the request</span>
+<span class="sd">    :type request: HttpRequest</span>
+<span class="sd">    :return: returns the request to render the corresponding html pages</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">current_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="k">if</span> <span class="n">current_user</span><span class="o">.</span><span class="n">id</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+            <span class="c1"># print(6)</span>
+            <span class="n">uform</span> <span class="o">=</span> <span class="n">register_student_for_course</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">uform</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span> <span class="p">:</span>
+                <span class="c1"># print(7)</span>
+                <span class="n">stud_name</span>  <span class="o">=</span> <span class="n">uform</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;user_name&quot;</span><span class="p">]</span>
+                <span class="n">stud_roll</span> <span class="o">=</span> <span class="n">uform</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s2">&quot;roll_no&quot;</span><span class="p">]</span>
+                <span class="n">users</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+                    <span class="c1"># print(8)</span>
+                    <span class="k">if</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">user_name</span> <span class="o">==</span> <span class="n">stud_name</span> <span class="ow">and</span> <span class="n">user</span><span class="o">.</span><span class="n">roll_no</span> <span class="o">==</span> <span class="n">stud_roll</span><span class="p">):</span>
+                        <span class="c1"># print(9)</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                    
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Student with this name and roll number does not exist&quot;</span>
+                    <span class="n">form</span> <span class="o">=</span> <span class="n">register_student_for_course</span><span class="p">()</span>
+                    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+                        <span class="s2">&quot;msg&quot;</span><span class="p">:</span><span class="n">msg</span><span class="p">,}</span>
+                    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/add_to_course.html&#39;</span><span class="p">,</span><span class="n">context</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    
+                    <span class="n">U</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">roll_no</span> <span class="o">=</span> <span class="n">stud_roll</span><span class="p">)</span>
+                    <span class="n">stud_courses</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="c1"># print(type(stud_courses[0]))</span>
+                    <span class="c1"># print(type(num))</span>
+                    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span>  <span class="n">stud_courses</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">num</span><span class="p">:</span>
+                            <span class="n">y</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="c1"># print(12)</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Student already enrolled for the course&quot;</span>
+                        <span class="n">form</span> <span class="o">=</span> <span class="n">register_student_for_course</span><span class="p">()</span>
+                        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+                        <span class="s2">&quot;msg&quot;</span><span class="p">:</span><span class="n">msg</span><span class="p">,}</span>
+                        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/add_to_course.html&#39;</span><span class="p">,</span><span class="n">context</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># print(13)</span>
+                        <span class="n">U</span><span class="o">.</span><span class="n">courses_registered</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+                        <span class="n">U</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Student successfully registered&quot;</span>
+                        <span class="n">form</span> <span class="o">=</span> <span class="n">register_student_for_course</span><span class="p">()</span>
+                        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+                        <span class="s2">&quot;msg&quot;</span><span class="p">:</span><span class="n">msg</span><span class="p">,}</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;http://127.0.0.1:8000/</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
+            
+    <span class="c1"># print(14)</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">register_student_for_course</span><span class="p">()</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;form&quot;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+                    <span class="s2">&quot;msg&quot;</span><span class="p">:</span><span class="n">msg</span><span class="p">,}</span>
+        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;users/add_to_course.html&#39;</span><span class="p">,</span><span class="n">context</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s2">&quot;http://127.0.0.1:8000/login&quot;</span><span class="p">)</span></div>
+
+
+
+
+
+    
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Arpana Prajapati, Palle Bhavana, Nikhil Verma.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

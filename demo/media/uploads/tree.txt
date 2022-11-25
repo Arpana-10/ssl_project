@@ -1,5 +1,0 @@
-Resources
-├── Final_output.pdf
-└── template.tex
-
-0 directories, 2 files
