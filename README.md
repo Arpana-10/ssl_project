@@ -73,7 +73,7 @@ Students registered for a course can view all the assignments and make multiple 
 
 #### File Type Checking
 
-Before saving any file in the database, the file type is getting checked wherever a only particular range of file types are required
+Before saving any file in the database, the file type is getting checked wherever only a particular range of file types are allowed
 
 #### Autograder for each submission
 
